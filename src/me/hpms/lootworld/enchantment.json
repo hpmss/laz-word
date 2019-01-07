@@ -1,0 +1,41 @@
+{
+  "enchantment":
+  {
+    "ARROW_DAMAGE" : ["Arrow Damage","arrow_damage","arrow damage","ARROW DAMAGE","ARROW_DAMAGE"],
+    "ARROW_FIRE" : ["Arrow Fire"],
+    "ARROW_INFINITE" : ["Arrow Infinite"],
+    "ARROW_KNOCKBACk" : ["Arrow Knockback"],
+    "BINDING_CURSE" : ["Binding Curse"],
+    "CHANNELING" : ["Channeling"],
+    "DAMAGE_ALL": ["Damage All"],
+    "DAMAGE_ARTHROPODS" : ["Damage Arthropods"],
+    "DAMAGE_UNDEAD": ["Damage Undead"],
+    "DEPTH_STRIDER": ["Depth Strider"],
+    "DIG_SPEED": ["Dig Speed"],
+    "DURABILITY": [],
+    "FIRE_ASPECT": [],
+    "FROST_WALKER" : [],
+    "IMPALING" : [],
+    "KNOCKBACK": [],
+    "LOOT_BONUS_BLOCKS" : [],
+    "LOOT_BONUS_MOBS": [],
+    "LOYALTY" : [],
+    "LUCK" : [],
+    "FIRE" : [],
+    "MENDING" : [],
+    "OXYGEN": [],
+    "PROTECTION_ENVIRONMENTAL": [],
+    "PROTECTION_EXPLOSIONS": [],
+    "PROTECTION_FALL" : [],
+    "PROTECTION_FIRE" : [],
+    "PROTECTION_PROJECTILE" : [],
+    "RIPTIDE": [],
+    "SILK_TOUCH" : [],
+    "SWEEPING_EDGE": [],
+    "THORNS" : [],
+    "VANISHING_CURSE" : [],
+    "WATER_WORKER": []
+
+  }
+
+}
