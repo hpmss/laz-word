@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.libs.jline.internal.Log;
@@ -75,14 +76,14 @@ public class ItemConfig{
 
 					Object obj = parser.parse(new FileReader(file.getPath()));
 					JSONObject jsonObj = (JSONObject) obj;
-
-					for(Enchantment enchantKey : enchantment) {
-						JSONArray enchantArray = (JSONArray) jsonObj.get(enchantKey);
-						for(Object enName : enchantArray) {
-							String s = (String) enName;
-							Log.info(s);
-						}
-					}
+					JSONArray element = (JSONArray)jsonObj.get("enchantment");
+					
+					@SuppressWarnings("unchecked")
+					HashMap<String,List<String>> elementMap = (HashMap<String, List<String>>) element.get(0);
+					
+					for(Map.Entry<String, List<String>> entry : elementMap.entrySet()) {
+						Log.info(entry.getKey(),entry.getValue());
+					}			
 				}
 
 			}catch(IOException e) {
