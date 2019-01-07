@@ -3,6 +3,7 @@ package me.hpms.lootworld;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,7 @@ public class ItemConfig{
 	private Material material;
 	private int amount;
 	private List<String> enchantments;
-	private HashMap<List<String>,String> enchantMap = new HashMap<List<String>,String>();
+	private List<String> usedEnchantmentMap;
 
 
 	enum Enchantment {
@@ -47,7 +48,7 @@ public class ItemConfig{
 		this.path = path;
 
 		this.itemStack = iniItem();
-		this.enchantMap = initEnchantName();
+		this.usedEnchantmentMap = initEnchantName();
 
 	}
 
@@ -63,10 +64,12 @@ public class ItemConfig{
 		return this.itemLore;
 	}
 
-	private HashMap<List<String>,String> initEnchantName(){
+	private List<String> initEnchantName(){
 
-		HashMap<List<String>,String> map = new HashMap<List<String>,String>();
+		List<String> usedEnchantment = new ArrayList<String>();
+		
 		Enchantment[] enchantment = Enchantment.values();
+		
 		JSONParser parser = new JSONParser();
 
 		for (File file : path.listFiles()) {
@@ -81,9 +84,9 @@ public class ItemConfig{
 					@SuppressWarnings("unchecked")
 					HashMap<String,List<String>> elementMap = (HashMap<String, List<String>>) element.get(0);
 					
-					for(Map.Entry<String, List<String>> entry : elementMap.entrySet()) {
-						Log.info(entry.getKey(),entry.getValue());
-					}			
+					for(Object value : elementMap.values()) {
+						
+					}
 				}
 
 			}catch(IOException e) {
@@ -95,7 +98,7 @@ public class ItemConfig{
 
 		}
 
-		return map;
+		return usedEnchantment;
 	}
 
 	private ItemStack iniItem() {
