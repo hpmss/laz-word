@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.libs.jline.internal.Log;
@@ -51,6 +52,22 @@ public class ItemConfig{
 		this.usedEnchantmentMap = initEnchantName();
 
 	}
+	public ItemConfig(File path,Material material,int amount) {
+		this.path = path;
+		this.material = material;
+		this.amount = amount;
+		this.displayName = material.name();
+		this.itemLore = null;
+		this.enchantments = null;
+	}
+	
+	public ItemConfig(Material material) {
+		this.material = material;
+		this.amount = 1;
+		this.displayName = material.name();
+		this.itemLore = null;
+		this.enchantments = null;
+	}
 
 	public ItemStack getItem() {
 		return this.itemStack;
@@ -68,8 +85,6 @@ public class ItemConfig{
 
 		List<String> usedEnchantment = new ArrayList<String>();
 		
-		Enchantment[] enchantment = Enchantment.values();
-		
 		JSONParser parser = new JSONParser();
 
 		for (File file : path.listFiles()) {
@@ -83,12 +98,21 @@ public class ItemConfig{
 					
 					@SuppressWarnings("unchecked")
 					HashMap<String,List<String>> elementMap = (HashMap<String, List<String>>) element.get(0);
-					
-					for(Object value : elementMap.values()) {
-						
+					if(this.enchantments != null ) {
+						for(Entry<String, List<String>> en : elementMap.entrySet()) {
+							
+							for(String enchantListed: enchantments) {
+								if(en.getValue().contains(enchantListed)) {
+									this.usedEnchantmentMap.add(en.getKey());
+									Log.info(en.getKey());
+								}
+							}
+						}
+					}else {
+						this.usedEnchantmentMap = null;
 					}
+				
 				}
-
 			}catch(IOException e) {
 				Log.info("-> enchantment.json file does not found...");
 
@@ -97,7 +121,6 @@ public class ItemConfig{
 			}
 
 		}
-
 		return usedEnchantment;
 	}
 
