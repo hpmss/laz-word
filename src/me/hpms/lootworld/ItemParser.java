@@ -23,6 +23,13 @@ import org.json.simple.parser.ParseException;
 
 public class ItemParser {
 	
+	
+	/* TODO
+	 * -> Fix 'lore' casting to ArrayList<String>
+	 * -> fix getResourceAsStream() NPE
+	 * 
+	 */
+	
 	private Material material = Material.BED;
 	private String name = material.name();
 	
@@ -72,12 +79,12 @@ public class ItemParser {
 						Object itemValue = set.getValue();
 						try {
 							switch(itemKey) {
-							case "name": this.name = (String) itemValue;
-							case "material": this.material = Material.valueOf((String)itemValue);
-							case "amount": this.amount = Integer.parseInt((String)itemValue);
+							case "name": this.name = itemValue.toString();
+							case "material": this.material = Material.valueOf(itemValue.toString());
+							case "amount": this.amount = Integer.parseInt(itemValue.toString());
 							case "lore": this.lore = (ArrayList<String>) itemValue;
 							case "enchantment": this.enchantment = (HashMap<String,Integer>) itemValue;
-							case "probability": this.probability = Float.parseFloat((String) itemValue);
+							case "probability": this.probability = Float.parseFloat(itemValue.toString());
 								
 							}
 						}catch(NumberFormatException e) {
@@ -85,9 +92,12 @@ public class ItemParser {
 							return false;
 							
 						}catch(ClassCastException e) {
+							System.out.print(itemKey);
+							System.out.print(itemValue);
 							System.out.print("-> make sure \'material\' is valid...");
 							System.out.print("-> make sure \'enchantment\' has key(enchantment_name),value(level) format...");
 							System.out.print("-> make sure \'lore\' is a list of strings");
+							e.printStackTrace();
 							return false;
 						}
 						

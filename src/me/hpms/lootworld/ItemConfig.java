@@ -17,6 +17,11 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class ItemConfig{
+	
+	/* TODO
+	 * -> optimize initializeEnchantName()
+	 * 
+	 */
 
 	private File path;
 	private ItemStack itemStack;
