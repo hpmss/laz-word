@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.libs.jline.internal.Log;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.json.simple.JSONArray;
@@ -27,25 +28,25 @@ public class ItemConfig{
 	private List<String> itemLore;
 	private Material material;
 	private int amount;
-	private List<String> enchantments;
-	private List<String> usedEnchantmentMap;
+	private HashMap<String,Integer> configuredEnchantment;
+	private HashMap<String,Integer> usedEnchantmentMap;
 
 
-	enum Enchantment {
-		ARROW_DAMAGE,ARROW_FIRE,ARROW_INFINITE,ARROW_KNOCKBACK,BINDING_CURSE,
-		CHANNELING,DAMAGE_ALL,DAMAGE_ARTHROPODS,DAMAGE_UNDEAD,DEPTH_STRIDER,
-		DIG_SPEED,DURABILITY,FIRE_ASPECT,FROST_WALKER,IMPALING,KNOCKBACK,LOOT_BONUS_BLOCKS,
-		LOOT_BONUS_MOBS,LOYALTY,LUCK,FIRE,MENDING,OXYGEN,PROTECTION_ENVIRONMENTAL,PROTECTION_EXPLOSIONS,
-		PROTECTION_FALL,PROTECTION_FIRE,PROTECTION_PROJECTILE,RIPTIDE,SILK_TOUCH,SWEEPING_EDGE,THORNS,
-		VANISHING_CURSE,WATER_WORKER;
-	}
+//	enum Enchantment {
+//		ARROW_DAMAGE,ARROW_FIRE,ARROW_INFINITE,ARROW_KNOCKBACK,BINDING_CURSE,
+//		CHANNELING,DAMAGE_ALL,DAMAGE_ARTHROPODS,DAMAGE_UNDEAD,DEPTH_STRIDER,
+//		DIG_SPEED,DURABILITY,FIRE_ASPECT,FROST_WALKER,IMPALING,KNOCKBACK,LOOT_BONUS_BLOCKS,
+//		LOOT_BONUS_MOBS,LOYALTY,LUCK,FIRE,MENDING,OXYGEN,PROTECTION_ENVIRONMENTAL,PROTECTION_EXPLOSIONS,
+//		PROTECTION_FALL,PROTECTION_FIRE,PROTECTION_PROJECTILE,RIPTIDE,SILK_TOUCH,SWEEPING_EDGE,THORNS,
+//		VANISHING_CURSE,WATER_WORKER;
+//	}
 
-	public ItemConfig(File path,Material material,int amount,String displayName,List<String> itemLore,List<String> enchantments) {
+	public ItemConfig(File path,Material material,int amount,String displayName,List<String> itemLore,HashMap<String,Integer> enchantments) {
 		this.displayName = displayName;
 		this.itemLore = itemLore;
 		this.material = material;
 		this.amount = amount;
-		this.enchantments = enchantments;
+		this.configuredEnchantment = enchantments;
 		this.path = path;
 
 		this.itemStack = iniItem();
@@ -57,16 +58,16 @@ public class ItemConfig{
 		this.material = material;
 		this.amount = amount;
 		this.displayName = material.name();
-		this.itemLore = null;
-		this.enchantments = null;
+		this.itemLore = new ArrayList<String>();
+		this.usedEnchantmentMap = null;
 	}
 	
 	public ItemConfig(Material material) {
 		this.material = material;
 		this.amount = 1;
 		this.displayName = material.name();
-		this.itemLore = null;
-		this.enchantments = null;
+		this.itemLore = new ArrayList<String>();
+		this.usedEnchantmentMap = null;
 	}
 
 	public ItemStack getItem() {
@@ -81,9 +82,9 @@ public class ItemConfig{
 		return this.itemLore;
 	}
 
-	private List<String> initEnchantName(){
+	private HashMap<String,Integer> initEnchantName(){
 
-		List<String> usedEnchantment = new ArrayList<String>();
+		HashMap<String,Integer> usedEnchantment = new HashMap<String,Integer>();
 		
 		JSONParser parser = new JSONParser();
 
@@ -97,19 +98,20 @@ public class ItemConfig{
 					JSONArray element = (JSONArray)jsonObj.get("enchantment");
 					
 					@SuppressWarnings("unchecked")
+					//Get json enchantment dictionary
 					HashMap<String,List<String>> elementMap = (HashMap<String, List<String>>) element.get(0);
-					if(this.enchantments != null ) {
+					if(this.configuredEnchantment != null ) {
 						for(Entry<String, List<String>> en : elementMap.entrySet()) {
-							
-							for(String enchantListed: enchantments) {
-								if(en.getValue().contains(enchantListed)) {
-									this.usedEnchantmentMap.add(en.getKey());
-									Log.info(en.getKey());
+							for(Entry<String,Integer> enchantListed: this.configuredEnchantment.entrySet()) {
+								if(en.getValue().contains(enchantListed.getKey())) {
+									usedEnchantment.put(en.getKey(), enchantListed.getValue());
+									
 								}
+								
 							}
 						}
 					}else {
-						this.usedEnchantmentMap = null;
+						usedEnchantment = null;
 					}
 				
 				}
@@ -130,6 +132,13 @@ public class ItemConfig{
 		ItemMeta meta = itemStack.getItemMeta();
 		meta.setDisplayName(this.displayName);
 		meta.setLore(itemLore);
+		if(this.usedEnchantmentMap != null) {
+			for(Entry<String,Integer> e: usedEnchantmentMap.entrySet()) {
+				meta.addEnchant(Enchantment.getByName(e.getKey()),e.getValue(),true);
+			}
+		}
+		itemStack.setItemMeta(meta);
+		
 
 		return itemStack;
 	}
