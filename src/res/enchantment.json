@@ -1,6 +1,5 @@
 {
   "enchantment":
-  [
     {
     "ARROW_DAMAGE" : ["Arrow Damage","arrow_damage","arrow damage","ARROW DAMAGE","ARROW_DAMAGE"],
     "ARROW_FIRE" : ["Arrow Fire"],
@@ -38,5 +37,4 @@
     "WATER_WORKER": ["Water Worker"]
 
   }
-]
 }

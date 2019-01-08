@@ -3,7 +3,6 @@ package me.hpms.lootworld;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -13,7 +12,6 @@ import org.bukkit.craftbukkit.libs.jline.internal.Log;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -24,15 +22,16 @@ public class ItemConfig{
 	private ItemStack itemStack;
 
 	private String displayName;
+	private Material material;
+	private int amount;
 	private List<String> itemLore;
 	private HashMap<String,Integer> configuredEnchantment;
 	private HashMap<String,Integer> usedEnchantmentMap;
-	private Material material;
-	private int amount;
 	private float probability;
+	
 
 
-	public ItemConfig(File path,Material material,int amount,float probability,String displayName,List<String> itemLore,HashMap<String,Integer> enchantments) {
+	public ItemConfig(File path,String displayName,Material material,int amount,List<String> itemLore,HashMap<String,Integer> enchantments,float probability) {
 		this.displayName = displayName;
 		this.itemLore = itemLore;
 		this.material = material;
@@ -43,26 +42,6 @@ public class ItemConfig{
 		this.usedEnchantmentMap = initializeEnchantName();
 		this.itemStack = initializeItem();
 
-	}
-	public ItemConfig(File path,Material material,int amount,float probability) {
-		this.path = path;
-		this.material = material;
-		this.amount = amount;
-		this.displayName = material.name();
-		this.itemLore = new ArrayList<String>();
-		this.usedEnchantmentMap = null;
-		this.probability = probability;
-		this.itemStack = initializeItem();
-	}
-	
-	public ItemConfig(Material material) {
-		this.material = material;
-		this.amount = 1;
-		this.displayName = material.name();
-		this.itemLore = new ArrayList<String>();
-		this.usedEnchantmentMap = null;
-		this.probability = 1f;
-		this.itemStack = initializeItem();
 	}
 	
 	//Class properties
@@ -88,7 +67,7 @@ public class ItemConfig{
 	}
 	
 	//Class Methods
-
+	@SuppressWarnings("unchecked")
 	private HashMap<String,Integer> initializeEnchantName(){
 
 		HashMap<String,Integer> usedEnchantment = new HashMap<String,Integer>();
@@ -102,11 +81,13 @@ public class ItemConfig{
 
 					Object obj = parser.parse(new FileReader(file.getPath()));
 					JSONObject jsonObj = (JSONObject) obj;
-					JSONArray element = (JSONArray)jsonObj.get("enchantment");
 					
-					@SuppressWarnings("unchecked")
+					
+					
+					JSONObject element = (JSONObject)jsonObj.get("enchantment");
+					
 					//Get JSON enchantment dictionary
-					HashMap<String,List<String>> elementMap = (HashMap<String, List<String>>) element.get(0);
+					HashMap<String,List<String>> elementMap = (HashMap<String, List<String>>) element;
 					if(this.configuredEnchantment != null ) {
 						for(Entry<String, List<String>> en : elementMap.entrySet()) {
 							for(Entry<String,Integer> enchantListed: this.configuredEnchantment.entrySet()) {
