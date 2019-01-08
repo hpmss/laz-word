@@ -26,40 +26,34 @@ public class ItemConfig{
 
 	private String displayName;
 	private List<String> itemLore;
-	private Material material;
-	private int amount;
 	private HashMap<String,Integer> configuredEnchantment;
 	private HashMap<String,Integer> usedEnchantmentMap;
+	private Material material;
+	private int amount;
+	private float probability;
 
 
-//	enum Enchantment {
-//		ARROW_DAMAGE,ARROW_FIRE,ARROW_INFINITE,ARROW_KNOCKBACK,BINDING_CURSE,
-//		CHANNELING,DAMAGE_ALL,DAMAGE_ARTHROPODS,DAMAGE_UNDEAD,DEPTH_STRIDER,
-//		DIG_SPEED,DURABILITY,FIRE_ASPECT,FROST_WALKER,IMPALING,KNOCKBACK,LOOT_BONUS_BLOCKS,
-//		LOOT_BONUS_MOBS,LOYALTY,LUCK,FIRE,MENDING,OXYGEN,PROTECTION_ENVIRONMENTAL,PROTECTION_EXPLOSIONS,
-//		PROTECTION_FALL,PROTECTION_FIRE,PROTECTION_PROJECTILE,RIPTIDE,SILK_TOUCH,SWEEPING_EDGE,THORNS,
-//		VANISHING_CURSE,WATER_WORKER;
-//	}
-
-	public ItemConfig(File path,Material material,int amount,String displayName,List<String> itemLore,HashMap<String,Integer> enchantments) {
+	public ItemConfig(File path,Material material,int amount,float probability,String displayName,List<String> itemLore,HashMap<String,Integer> enchantments) {
 		this.displayName = displayName;
 		this.itemLore = itemLore;
 		this.material = material;
 		this.amount = amount;
 		this.configuredEnchantment = enchantments;
 		this.path = path;
-
-		this.itemStack = iniItem();
-		this.usedEnchantmentMap = initEnchantName();
+		this.probability = probability;
+		this.usedEnchantmentMap = initializeEnchantName();
+		this.itemStack = initializeItem();
 
 	}
-	public ItemConfig(File path,Material material,int amount) {
+	public ItemConfig(File path,Material material,int amount,float probability) {
 		this.path = path;
 		this.material = material;
 		this.amount = amount;
 		this.displayName = material.name();
 		this.itemLore = new ArrayList<String>();
 		this.usedEnchantmentMap = null;
+		this.probability = probability;
+		this.itemStack = initializeItem();
 	}
 	
 	public ItemConfig(Material material) {
@@ -68,7 +62,11 @@ public class ItemConfig{
 		this.displayName = material.name();
 		this.itemLore = new ArrayList<String>();
 		this.usedEnchantmentMap = null;
+		this.probability = 1f;
+		this.itemStack = initializeItem();
 	}
+	
+	//Class properties
 
 	public ItemStack getItem() {
 		return this.itemStack;
@@ -81,8 +79,18 @@ public class ItemConfig{
 	public List<String> getItemLore() {
 		return this.itemLore;
 	}
+	
+	public float getProbability() {
+		return this.probability;
+	}
+	
+	public HashMap<String,Integer> getUsedEnchantment() {
+		return this.usedEnchantmentMap;
+	}
+	
+	//Class Methods
 
-	private HashMap<String,Integer> initEnchantName(){
+	private HashMap<String,Integer> initializeEnchantName(){
 
 		HashMap<String,Integer> usedEnchantment = new HashMap<String,Integer>();
 		
@@ -98,16 +106,15 @@ public class ItemConfig{
 					JSONArray element = (JSONArray)jsonObj.get("enchantment");
 					
 					@SuppressWarnings("unchecked")
-					//Get json enchantment dictionary
+					//Get JSON enchantment dictionary
 					HashMap<String,List<String>> elementMap = (HashMap<String, List<String>>) element.get(0);
 					if(this.configuredEnchantment != null ) {
 						for(Entry<String, List<String>> en : elementMap.entrySet()) {
 							for(Entry<String,Integer> enchantListed: this.configuredEnchantment.entrySet()) {
-								if(en.getValue().contains(enchantListed.getKey())) {
+								String deCapName = enchantListed.getKey().toLowerCase();
+								if(en.getValue().contains(deCapName)) {
 									usedEnchantment.put(en.getKey(), enchantListed.getValue());
-									
 								}
-								
 							}
 						}
 					}else {
@@ -125,8 +132,9 @@ public class ItemConfig{
 		}
 		return usedEnchantment;
 	}
+	
 
-	private ItemStack iniItem() {
+	private ItemStack initializeItem() {
 
 		ItemStack itemStack = new ItemStack(this.material,this.amount);
 		ItemMeta meta = itemStack.getItemMeta();
@@ -138,7 +146,6 @@ public class ItemConfig{
 			}
 		}
 		itemStack.setItemMeta(meta);
-		
 
 		return itemStack;
 	}

@@ -14,7 +14,7 @@
     "DEPTH_STRIDER": ["Depth Strider"],
     "DIG_SPEED": ["Dig Speed"],
     "DURABILITY": ["Durability"],
-    "FIRE_ASPECT": ["Fire Aspect"],
+    "FIRE_ASPECT": ["fire aspect","fire_aspect","fireaspect"],
     "FROST_WALKER" : ["Frost Walker"],
     "IMPALING" : ["Impaling"],
     "KNOCKBACK": ["Knockback"],
