@@ -90,9 +90,9 @@ public class ItemConfig{
 			for(Entry<String, List<String>> en : elementMap.entrySet()) {
 				for(Entry<String,Integer> enchantListed: this.configuredEnchantment.entrySet()) {
 					String deCapName = enchantListed.getKey().toLowerCase();
+					deCapName = deCapName.substring(1,deCapName.length() -1);
 					if(en.getValue().contains(deCapName)) {
-						Log.info("Ding");
-						usedEnchantment.put(en.getKey(),enchantListed.getValue());
+						usedEnchantment.put(en.getKey(), enchantListed.getValue());
 					}
 				}
 			}

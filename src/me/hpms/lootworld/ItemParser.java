@@ -179,7 +179,6 @@ public class ItemParser {
 			}
 		}
 		return true;
-		
 	}
 	public void getJSONData(String fileToReadFromJar,BufferedWriter writer) {
 		InputStream in = this.getClass().getClassLoader().getResourceAsStream("res/" + fileToReadFromJar);
