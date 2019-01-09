@@ -3,6 +3,7 @@ package me.hpms.lootworld;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,8 +30,10 @@ public class EventListener implements Listener {
 		
 		Player p = e.getPlayer();
 		Location l = p.getLocation();
+		String location = l.getX() + "," + l.getY() + "," + l.getZ() + "," + l.getWorld().getName();
 		
-		plugin.getGenerator().getFileConfiguration().set("location", l.toString());
+		ConfigurationSection section = plugin.getGenerator().getFileConfiguration().getConfigurationSection("location");
+		section.set(p.getUniqueId().toString(), location);
 		plugin.getGenerator().saveConfiguration();
 		
 	}
