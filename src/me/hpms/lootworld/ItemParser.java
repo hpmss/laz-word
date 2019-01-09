@@ -15,7 +15,6 @@ import java.util.List;
 
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.libs.jline.internal.Log;
-import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -32,7 +31,7 @@ public class ItemParser {
 	private List<String> lore = new ArrayList<String>();
 	private HashMap<String,Integer> enchantment = null;
 	private float probability = 1f;
-	private ArrayList<ItemStack> items = new ArrayList<ItemStack>();
+	private ArrayList<ItemConfig> items = new ArrayList<ItemConfig>();
 	
 	
 	private File getDataFolder;
@@ -49,7 +48,7 @@ public class ItemParser {
 		
 	}
 	
-	public List<ItemStack> getParsedItems() {
+	public List<ItemConfig> getParsedItems() {
 		return this.items;
 	}
 	
@@ -92,8 +91,9 @@ public class ItemParser {
 							return false;
 						}
 					}
+					
 					ItemConfig item = new ItemConfig(file,name,material,amount,lore,enchantment,probability);
-					items.add(item.getItem());
+					items.add(item);
 					
 				}
 				
@@ -180,6 +180,7 @@ public class ItemParser {
 		}
 		return true;
 	}
+	
 	public void getJSONData(String fileToReadFromJar,BufferedWriter writer) {
 		InputStream in = this.getClass().getClassLoader().getResourceAsStream("res/" + fileToReadFromJar);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
