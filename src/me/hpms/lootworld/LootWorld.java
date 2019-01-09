@@ -1,5 +1,6 @@
 package me.hpms.lootworld;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.util.List;
 
@@ -8,7 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class LootWorld extends JavaPlugin{
 	
 	
-	private final File path = new File(getDataFolder() + "");
+	private File path = new File(getDataFolder() + "");
 	
 	private EventListener listener;
 	
@@ -17,18 +18,23 @@ public class LootWorld extends JavaPlugin{
 	
 	@Override
 	public void onEnable() {
-		
-		listener = new EventListener(this);
-		parser = new ItemParser(path);
-		
-		getServer().getPluginManager().registerEvents(listener, this);
 		getDataFolder().mkdir();
+		
+		parser = new ItemParser(path);
+		listener = new EventListener(this);
+		
+		getServer().getPluginManager().registerEvents(listener, this);	
 		
 	}
 	
 	public List<ItemConfig> getParsedItems() {
 		return parser.getParsedItems();
 	}
+	
+	public void parseSourceFromJar(String pathToJar,BufferedWriter writer) {
+		parser.getJSONData(pathToJar, writer);
+	}
+	
 	
 
 	

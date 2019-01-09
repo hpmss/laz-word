@@ -25,7 +25,7 @@ public class ItemParser {
 	private String stringEnchantment;
 	
 	private Material material = Material.BED;
-	private String name = material.name();
+	private String name = material.toString();
 
 	private int amount = 1;
 	private List<String> lore = new ArrayList<String>();
@@ -52,6 +52,9 @@ public class ItemParser {
 		return this.items;
 	}
 	
+	
+	
+	//Class Methods
 	@SuppressWarnings("unchecked")
 	public boolean parseCustomItem(File file) {
 		
@@ -62,10 +65,9 @@ public class ItemParser {
 			try {
 				JSONObject jsonObj = (JSONObject) parser.parse(new FileReader(itemPath));
 				
-				//Get every items in items.json
 				for(Object key : jsonObj.keySet()) {
 					JSONObject keyObject = (JSONObject) jsonObj.get(key);
-					//Loops through each item
+					resetDefault();
 					HashMap<String,Object> itemMap = (HashMap<String,Object>) keyObject;
 					for(String keySet : itemMap.keySet()) {
 						Object itemValue = itemMap.get(keySet);
@@ -111,6 +113,16 @@ public class ItemParser {
 			return true;
 			
 		}
+	
+	public void resetDefault() {
+		material = Material.BED;
+		name = material.name();
+
+		amount = 1;
+		lore = new ArrayList<String>();
+		enchantment = null;
+		probability = 1f;
+	}
 	
 	public HashMap<String,Integer> convertStringToHashMap(String stringHashMap) {
 		HashMap<String,Integer> enchantment = new HashMap<String,Integer>();

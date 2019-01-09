@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.libs.jline.internal.Log;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -20,14 +19,21 @@ import org.json.simple.parser.ParseException;
 public class ItemConfig{
 	
 	private File path;
+	
 	private ItemStack itemStack;
 
 	private String displayName;
+	
 	private Material material;
+	
 	private int amount;
+	
 	private List<String> itemLore;
+	
 	private HashMap<String,Integer> configuredEnchantment;
+	
 	private HashMap<String,Integer> usedEnchantmentMap;
+	
 	private float probability;
 	
 
@@ -48,8 +54,6 @@ public class ItemConfig{
 		this.itemStack = initializeItem();
 
 	}
-	
-	//Class properties
 
 	public ItemStack getItem() {
 		return this.itemStack;
@@ -86,7 +90,6 @@ public class ItemConfig{
 		//Get JSON enchantment dictionary
 		HashMap<String,List<String>> elementMap = (HashMap<String, List<String>>) element;
 		if(this.configuredEnchantment != null ) {
-			Log.info(this.configuredEnchantment);
 			for(Entry<String, List<String>> en : elementMap.entrySet()) {
 				for(Entry<String,Integer> enchantListed: this.configuredEnchantment.entrySet()) {
 					String deCapName = enchantListed.getKey().toLowerCase();
