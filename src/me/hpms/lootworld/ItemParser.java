@@ -23,10 +23,11 @@ import org.json.simple.parser.ParseException;
 public class ItemParser {
 	
 	private String PREFIX = "『LootWorld』";
+	private String stringEnchantment;
 	
 	private Material material = Material.BED;
 	private String name = material.name();
-	
+
 	private int amount = 1;
 	private List<String> lore = new ArrayList<String>();
 	private HashMap<String,Integer> enchantment = null;
@@ -45,7 +46,6 @@ public class ItemParser {
 			e.printStackTrace();
 		}
 		parseCustomItem(getDataFolder);
-		
 		
 	}
 	
@@ -76,7 +76,7 @@ public class ItemParser {
 							case "material": this.material = Material.valueOf(itemValue.toString());break;
 							case "amount": this.amount = Integer.parseInt(itemValue.toString());break;
 							case "lore": this.lore = (List<String>) itemValue;break;
-							case "enchantment": this.enchantment = (HashMap<String,Integer>) itemValue;break;
+							case "enchantment": this.stringEnchantment = itemValue.toString();this.enchantment = convertStringToHashMap(stringEnchantment);break;
 							case "probability": this.probability = Float.parseFloat(itemValue.toString());break;
 								
 							}
@@ -92,7 +92,6 @@ public class ItemParser {
 							return false;
 						}
 					}
-					System.out.print(Math.toIntExact(this.enchantment.get("fire_aspect")));
 					ItemConfig item = new ItemConfig(file,name,material,amount,lore,enchantment,probability);
 					items.add(item.getItem());
 					
@@ -112,6 +111,29 @@ public class ItemParser {
 			return true;
 			
 		}
+	
+	public HashMap<String,Integer> convertStringToHashMap(String stringHashMap) {
+		HashMap<String,Integer> enchantment = new HashMap<String,Integer>();
+		
+		stringHashMap = stringHashMap.substring(1,stringHashMap.length() - 1);
+		String[] keyValue = stringHashMap.split(",");
+		if(keyValue.length != 0) {
+			for(String pair : keyValue) {
+				String[] entry = pair.split(":");
+				if(!(pair.endsWith(":")) && entry.length != 0) {
+					try {
+						enchantment.put(entry[0].trim(), Integer.parseInt(entry[1].trim()));
+					}catch(NumberFormatException e) {
+						Log.info(PREFIX + "-> make sure level specified is a valid integer...");
+						e.printStackTrace();
+					}
+				}else {
+					Log.info(PREFIX + "-> level for \'" + entry[0] + "\' not specified ? ...");
+				}
+			}
+		}
+		return enchantment;
+	}
 		
 	public boolean generateRequiredJSONFile() throws IOException {
 		File fileEnchantment = new File(getDataFolder.getPath() + "/enchantment.json");

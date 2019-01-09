@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.libs.jline.internal.Log;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -85,10 +86,12 @@ public class ItemConfig{
 		//Get JSON enchantment dictionary
 		HashMap<String,List<String>> elementMap = (HashMap<String, List<String>>) element;
 		if(this.configuredEnchantment != null ) {
+			Log.info(this.configuredEnchantment);
 			for(Entry<String, List<String>> en : elementMap.entrySet()) {
 				for(Entry<String,Integer> enchantListed: this.configuredEnchantment.entrySet()) {
 					String deCapName = enchantListed.getKey().toLowerCase();
 					if(en.getValue().contains(deCapName)) {
+						Log.info("Ding");
 						usedEnchantment.put(en.getKey(),enchantListed.getValue());
 					}
 				}
@@ -100,7 +103,6 @@ public class ItemConfig{
 		return usedEnchantment;
 	}
 	
-
 	private ItemStack initializeItem() {
 
 		ItemStack itemStack = new ItemStack(this.material,this.amount);
