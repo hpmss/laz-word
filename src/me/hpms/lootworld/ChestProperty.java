@@ -39,6 +39,14 @@ public class ChestProperty {
 		return probabilityDistribution;
 	}
 	
+	public FixedMetadataValue getFixedMetadata() {
+		return metaData;
+	}
+	
+	public LootWorld getPlugin() {
+		return this.plugin;
+	}
+	
 	
 	
 	

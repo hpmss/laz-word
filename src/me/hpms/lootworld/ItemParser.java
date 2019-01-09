@@ -45,18 +45,15 @@ public class ItemParser {
 			e.printStackTrace();
 		}
 		parseCustomItem(getDataFolder);
-		
 	}
 	
 	public List<ItemConfig> getParsedItems() {
 		return this.items;
 	}
 	
-	
-	
 	//Class Methods
 	@SuppressWarnings("unchecked")
-	public boolean parseCustomItem(File file) {
+	public void parseCustomItem(File file) {
 		
 		JSONParser parser = new JSONParser();
 		
@@ -83,14 +80,14 @@ public class ItemParser {
 							}
 						}catch(NumberFormatException e) {
 							Log.info(PREFIX + "-> either \'probability\' or \'amount\' have incorrect format...");
-							return false;
+							return;
 							
 						}catch(ClassCastException e) {
 							Log.info(PREFIX + "-> make sure \'material\' is valid...");
 							Log.info(PREFIX + "-> make sure \'enchantment\' has key(enchantment_name),value(level) format...");
 							Log.info(PREFIX + "-> make sure \'lore\' is a list of strings");
 							e.printStackTrace();
-							return false;
+							return;
 						}
 					}
 					
@@ -101,16 +98,16 @@ public class ItemParser {
 				
 			} catch (FileNotFoundException e) {
 				Log.info(PREFIX + "-> items.json is not found...");
-				return false;
+				return;
 			} catch (IOException e) {
 				Log.info(PREFIX + "-> items.json seems to be corrupted...");
-				return false;
+				return;
 			} catch (ParseException e) {
 				Log.info(PREFIX + "-> items.json is unparsable...");
-				return false;
+				return;
 			}
 			
-			return true;
+			return;
 			
 		}
 	
@@ -147,7 +144,7 @@ public class ItemParser {
 		return enchantment;
 	}
 		
-	public boolean generateRequiredJSONFile() throws IOException {
+	public void generateRequiredJSONFile() throws IOException {
 		File fileEnchantment = new File(getDataFolder.getPath() + "/enchantment.json");
 		File fileItem = new File(getDataFolder.getPath() + "/items.json");
 		BufferedWriter writer = null;
@@ -172,7 +169,7 @@ public class ItemParser {
 		}
 		if(fileItem.exists()) {
 			Log.info(PREFIX + "-> items.json already existed...");
-			return false;
+			return;
 		}else {
 			try {
 				fileItem.createNewFile();
@@ -182,7 +179,7 @@ public class ItemParser {
 				
 			} catch (IOException e) {
 				e.printStackTrace();
-				return false;
+				return;
 			}
 			finally {
 				if(writer != null) {
@@ -190,7 +187,6 @@ public class ItemParser {
 				}
 			}
 		}
-		return true;
 	}
 	
 	public void getJSONData(String fileToReadFromJar,BufferedWriter writer) {

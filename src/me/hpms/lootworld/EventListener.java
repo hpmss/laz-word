@@ -2,9 +2,7 @@ package me.hpms.lootworld;
 
 import java.util.List;
 
-import org.bukkit.Chunk;
-import org.bukkit.craftbukkit.libs.jline.internal.Log;
-import org.bukkit.entity.Entity;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -30,18 +28,10 @@ public class EventListener implements Listener {
 	public void onPlayerJoinEvent(PlayerJoinEvent e) {
 		
 		Player p = e.getPlayer();
+		Location l = p.getLocation();
 		
-		if(p.getName().equalsIgnoreCase("Arest")) {
-			Chunk chunk = p.getLocation().getChunk();
-			Entity[] en = chunk.getEntities();
-			for(Entity entity : en) {
-				Log.info(entity);
-			}
-			p.sendMessage(PREFIX + "Items added...");
-			for(ItemConfig item : items) {
-				p.getInventory().addItem(item.getItem());
-			}
-		}
+		plugin.getGenerator().getFileConfiguration().set("location", l.toString());
+		plugin.getGenerator().saveConfiguration();
 		
 	}
 
