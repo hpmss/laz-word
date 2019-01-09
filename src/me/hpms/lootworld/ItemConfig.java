@@ -1,6 +1,7 @@
 package me.hpms.lootworld;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -8,7 +9,6 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.libs.jline.internal.Log;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -18,11 +18,6 @@ import org.json.simple.parser.ParseException;
 
 public class ItemConfig{
 	
-	/* TODO
-	 * -> optimize initializeEnchantName()
-	 * 
-	 */
-
 	private File path;
 	private ItemStack itemStack;
 
@@ -44,7 +39,11 @@ public class ItemConfig{
 		this.configuredEnchantment = enchantments;
 		this.path = path;
 		this.probability = probability;
-		this.usedEnchantmentMap = initializeEnchantName();
+		try {
+			this.usedEnchantmentMap = initializeEnchantName();
+		} catch (IOException | ParseException e) {
+			e.printStackTrace();
+		}
 		this.itemStack = initializeItem();
 
 	}
@@ -73,48 +72,31 @@ public class ItemConfig{
 	
 	//Class Methods
 	@SuppressWarnings("unchecked")
-	private HashMap<String,Integer> initializeEnchantName(){
+	private HashMap<String,Integer> initializeEnchantName() throws FileNotFoundException, IOException, ParseException{
 
 		HashMap<String,Integer> usedEnchantment = new HashMap<String,Integer>();
 		
 		JSONParser parser = new JSONParser();
-
-		for (File file : path.listFiles()) {
-			try {
-				String[] name = file.getName().split("[.]");
-				if(name[1].equalsIgnoreCase("json")) {
-
-					Object obj = parser.parse(new FileReader(file.getPath()));
-					JSONObject jsonObj = (JSONObject) obj;
-					
-					
-					
-					JSONObject element = (JSONObject)jsonObj.get("enchantment");
-					
-					//Get JSON enchantment dictionary
-					HashMap<String,List<String>> elementMap = (HashMap<String, List<String>>) element;
-					if(this.configuredEnchantment != null ) {
-						for(Entry<String, List<String>> en : elementMap.entrySet()) {
-							for(Entry<String,Integer> enchantListed: this.configuredEnchantment.entrySet()) {
-								String deCapName = enchantListed.getKey().toLowerCase();
-								if(en.getValue().contains(deCapName)) {
-									usedEnchantment.put(en.getKey(), enchantListed.getValue());
-								}
-							}
-						}
-					}else {
-						usedEnchantment = null;
+		File file = new File(path.getPath() + "/enchantment.json");
+		Object obj = parser.parse(new FileReader(file.getPath()));
+		JSONObject jsonObj = (JSONObject) obj;
+		
+		JSONObject element = (JSONObject)jsonObj.get("enchantment");
+		//Get JSON enchantment dictionary
+		HashMap<String,List<String>> elementMap = (HashMap<String, List<String>>) element;
+		if(this.configuredEnchantment != null ) {
+			for(Entry<String, List<String>> en : elementMap.entrySet()) {
+				for(Entry<String,Integer> enchantListed: this.configuredEnchantment.entrySet()) {
+					String deCapName = enchantListed.getKey().toLowerCase();
+					if(en.getValue().contains(deCapName)) {
+						usedEnchantment.put(en.getKey(),enchantListed.getValue());
 					}
-				
 				}
-			}catch(IOException e) {
-				Log.info("-> enchantment.json file does not found...");
-
-			}catch(ParseException e) {
-				Log.info("-> enchantment.json file cannot be parsed...");
 			}
-
+		}else {
+			usedEnchantment = null;
 		}
+
 		return usedEnchantment;
 	}
 	
@@ -134,6 +116,5 @@ public class ItemConfig{
 
 		return itemStack;
 	}
-
 
 }

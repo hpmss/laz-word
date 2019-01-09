@@ -12,7 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class LootWorld extends JavaPlugin implements Listener{
 		
-	private File path = new File(this.getDataFolder() + "");
+	private File path = new File(getDataFolder() + "");
 	private ItemParser parser;
 	@Override
 	public void onEnable() {

@@ -5,9 +5,9 @@
 		"amount": 1,
 		"lore": ["Hifumi Takimoto"],
 		"enchantment": {
-      "fire_aspect" : 2,
-      "arrow_damage": 3
-    },
+			"fire_aspect": 2,
+			"arrow_damage": 3
+		},
 		"probability": 0.3
 	}
 }
