@@ -10,11 +10,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Chest;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.craftbukkit.libs.jline.internal.Log;
+import org.bukkit.inventory.ItemStack;
 
 import net.md_5.bungee.api.ChatColor;
 
@@ -30,7 +30,7 @@ public class LocationGenerator {
 	
 	private LootWorld plugin;
 	
-	private final int maxChestPopulation = 1000;
+	private final int maxChestPopulation = 100;
 	
 	private final double positiveBoundary = 99984;
 	
@@ -52,7 +52,13 @@ public class LocationGenerator {
 		loadConfiguration();
 		readConfigurationToLocation();
 		generateLocation();
-		readConfigurationToLocation();
+		for(ItemStack item : plugin.getRankAllItems()) {
+			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + item.toString());
+		}
+		for(ItemConfig item : plugin.getParsedItems()) {
+			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + item.getItem().toString());
+		}
+		
 		
 	}
 	
@@ -177,19 +183,17 @@ public class LocationGenerator {
 			}
 			Location loc = new Location(world,x,y,z);
 			
-			loc.getBlock().setType(Material.CHEST);
-			
-			Chest chestBlock = (Chest) loc.getBlock().getState();
 			
 			ChestRarity entry = generateChestType();
 			
-			ChestProperty chest = new ChestProperty(plugin,chestBlock,entry.getChestName(),itemAmount,entry.getChestProbability());
+			ChestProperty chest = new ChestProperty(plugin,loc,entry.getChestName(),itemAmount,entry.getChestProbability());
 			
 			String locString = loc.getX() + "," + loc.getY() + "," + loc.getZ() + "," + loc.getWorld().getName();
 			section.set(chest.getRarity() + "-" + String.valueOf(i), locString);
 			saveConfiguration();
 			
 		}
+		readConfigurationToLocation();
 		
 		
 	}

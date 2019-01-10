@@ -16,6 +16,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import net.md_5.bungee.api.ChatColor;
+
 public class ItemConfig{
 	
 	private File path;
@@ -34,18 +36,18 @@ public class ItemConfig{
 	
 	private HashMap<String,Integer> usedEnchantmentMap;
 	
-	private float probability;
+	private String rank;
 	
 
 
-	public ItemConfig(File path,String displayName,Material material,int amount,List<String> itemLore,HashMap<String,Integer> enchantments,float probability) {
+	public ItemConfig(File path,String displayName,Material material,int amount,List<String> itemLore,HashMap<String,Integer> enchantments,String rank) {
 		this.displayName = displayName;
 		this.itemLore = itemLore;
 		this.material = material;
 		this.amount = amount;
 		this.configuredEnchantment = enchantments;
 		this.path = path;
-		this.probability = probability;
+		this.rank = rank;
 		try {
 			this.usedEnchantmentMap = initializeEnchantName();
 		} catch (IOException | ParseException e) {
@@ -67,8 +69,8 @@ public class ItemConfig{
 		return this.itemLore;
 	}
 	
-	public float getProbability() {
-		return this.probability;
+	public String getRank() {
+		return this.rank;
 	}
 	
 	public HashMap<String,Integer> getUsedEnchantment() {
@@ -110,7 +112,7 @@ public class ItemConfig{
 
 		ItemStack itemStack = new ItemStack(this.material,this.amount);
 		ItemMeta meta = itemStack.getItemMeta();
-		meta.setDisplayName(this.displayName);
+		meta.setDisplayName(ChatColor.translateAlternateColorCodes('&',this.displayName));
 		meta.setLore(itemLore);
 		if(this.usedEnchantmentMap != null) {
 			for(Entry<String,Integer> e: usedEnchantmentMap.entrySet()) {

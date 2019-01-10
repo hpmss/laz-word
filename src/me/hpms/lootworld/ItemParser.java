@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.libs.jline.internal.Log;
+import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -35,9 +36,13 @@ public class ItemParser {
 	
 	private HashMap<String,Integer> enchantment = null;
 	
-	private float probability = 1f;
+	private String rank = "all";
 	
 	private ArrayList<ItemConfig> items = new ArrayList<ItemConfig>();
+	
+	private ArrayList<ItemStack> rankAllItems = new ArrayList<ItemStack>();
+	
+	private int rankAllCounter = 0;
 	
 	
 	private File getDataFolder;
@@ -55,6 +60,22 @@ public class ItemParser {
 	
 	public List<ItemConfig> getParsedItems() {
 		return this.items;
+	}
+	
+	public List<ItemStack> getRankAllItems() {
+		return this.rankAllItems;
+	}
+	
+	public HashMap<Float,ItemStack> getRankAllItemsDistribution() {
+		HashMap<Float,ItemStack> items = new HashMap<Float,ItemStack>();
+		if(rankAllCounter != 0) {
+			float prob = 1 / rankAllCounter;
+			
+			for(ItemStack item : rankAllItems) {
+				items.put(prob, item);
+			}
+		}
+		return items;
 	}
 	
 	//Class Methods
@@ -81,11 +102,11 @@ public class ItemParser {
 							case "amount": this.amount = Integer.parseInt(itemValue.toString());break;
 							case "lore": this.lore = (List<String>) itemValue;break;
 							case "enchantment": this.stringEnchantment = itemValue.toString();this.enchantment = convertStringToHashMap(stringEnchantment);break;
-							case "probability": this.probability = Float.parseFloat(itemValue.toString());break;
+							case "rank": this.rank = itemValue.toString();break;
 								
 							}
 						}catch(NumberFormatException e) {
-							Log.info(PREFIX + "-> either \'probability\' or \'amount\' have incorrect format...");
+							Log.info(PREFIX + "-> either \'amount\' have incorrect format...");
 							return;
 							
 						}catch(ClassCastException e) {
@@ -97,8 +118,14 @@ public class ItemParser {
 						}
 					}
 					
-					ItemConfig item = new ItemConfig(file,name,material,amount,lore,enchantment,probability);
-					items.add(item);
+					ItemConfig item = new ItemConfig(file,name,material,amount,lore,enchantment,rank);
+					if(rank.equalsIgnoreCase("all")) {
+						rankAllItems.add(item.getItem());
+						rankAllCounter +=  1;
+					}else {
+						items.add(item);
+					}
+					
 					
 				}
 				
@@ -124,7 +151,7 @@ public class ItemParser {
 		amount = 1;
 		lore = new ArrayList<String>();
 		enchantment = null;
-		probability = 1f;
+		rank = "all";
 	}
 	
 	public HashMap<String,Integer> convertStringToHashMap(String stringHashMap) {

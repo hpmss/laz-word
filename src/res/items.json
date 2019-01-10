@@ -1,13 +1,43 @@
 {
 	"Hifumi": {
-		"name": "ChatColor.RED + Hifumi",
+		"name": "&L&K&5Hifumi",
 		"material": "DIAMOND_SWORD",
 		"amount": 1,
-		"lore": ["Hifumi Takimoto"],
+		"lore": ["&L&K&9Hifumi Takimoto"],
 		"enchantment": {
 			"fire_aspect": 2,
 			"arrow_damage": 3
 		},
-		"probability": 0.3
+		"rank": "common"
+	},
+	"pickaxe": {
+		"name": "Iron Pickaxe",
+		"material": "IRON_PICKAXE",
+		"amount": 1,
+		"rank": "common"
+	},
+	"bread": {
+		"name": "Bread",
+		"material": "BREAD",
+		"amount": 16,
+		"rank": "all"
+	},
+	"wheat": {
+		"name": "Wheat",
+		"material": "WHEAT",
+		"amount": 6,
+		"rank": "all"
+	},
+	"JoJo": {
+		"name": "&L&KJotaro",
+		"material": "DIAMOND_PICKAXE",
+		"lore": ["&B&LORAORAORAORAORAORAORA"],
+		"amount": 1,
+		"enchantment": {
+			"sharpness": 4,
+			"unbreaking": 4,
+			"fire_aspect": 2
+		},
+		"rank": "uncommon"
 	}
 }

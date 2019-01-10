@@ -2,8 +2,10 @@ package me.hpms.lootworld;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class LootWorld extends JavaPlugin{
@@ -43,6 +45,14 @@ public class LootWorld extends JavaPlugin{
 		return parser.getParsedItems();
 	}
 	
+	public List<ItemStack> getRankAllItems() {
+		return parser.getRankAllItems();
+	}
+	
+	public HashMap<Float,ItemStack> getRankAllItemsDistribution() {
+		return parser.getRankAllItemsDistribution();
+	}
+	
 	public ItemParser getItemParser() {
 		return parser;
 	}
@@ -59,7 +69,5 @@ public class LootWorld extends JavaPlugin{
 		parser.getJSONData(pathToJar, writer);
 	}
 	
-	
-
 	
 }
