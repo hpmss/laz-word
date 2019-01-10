@@ -10,13 +10,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.craftbukkit.libs.jline.internal.Log;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
 
 import net.md_5.bungee.api.ChatColor;
 
@@ -38,9 +36,11 @@ public class LocationGenerator {
 	
 	private final double negativeBoundary = -99984;
 	
-	private final double xOffset = 1000f;
+	private final double maxHeight = 256;
 	
-	private final double zOffset = 1000f;
+	private final int maxItem = 5;
+	
+	private final int minItem = 2;
 	
 	
 	
@@ -142,10 +142,12 @@ public class LocationGenerator {
 		Log.info(PREFIX + "If this is your first time this may take a while depends on maxChestPopulation");
 		ConfigurationSection section = locationConfig.getConfigurationSection("location");
 		double range = (positiveBoundary - negativeBoundary) + 1;
-		double maxHeight = 256;
+		
 		
 		World world = Bukkit.getWorld("world");
 		for(int i = 0; i < maxChestPopulation; i++) {
+			int itemAmount = (int) (Math.random() * ((maxItem - minItem ) + 1)) + minItem;
+			
 			double x = (Math.random() * range) + negativeBoundary;
 			double y = (Math.random() * maxHeight) + 1;
 			double z = (Math.random() * range) + negativeBoundary;
@@ -174,14 +176,17 @@ public class LocationGenerator {
 				
 			}
 			Location loc = new Location(world,x,y,z);
+			
 			loc.getBlock().setType(Material.CHEST);
-			Block b = loc.getBlock();
-			FixedMetadataValue meta = new FixedMetadataValue(plugin,loc);
+			
+			Chest chestBlock = (Chest) loc.getBlock().getState();
+			
 			ChestRarity entry = generateChestType();
 			
-			ChestProperty chest = new ChestProperty(plugin,b,entry.getChestName(),new ArrayList<ItemStack>(),entry.getChestProbability(),meta);
+			ChestProperty chest = new ChestProperty(plugin,chestBlock,entry.getChestName(),itemAmount,entry.getChestProbability());
+			
 			String locString = loc.getX() + "," + loc.getY() + "," + loc.getZ() + "," + loc.getWorld().getName();
-			section.set(chest.getRarity()+ "-" + String.valueOf(i), locString);
+			section.set(chest.getRarity() + "-" + String.valueOf(i), locString);
 			saveConfiguration();
 			
 		}
@@ -189,6 +194,4 @@ public class LocationGenerator {
 		
 	}
 	
-	
-
 }
