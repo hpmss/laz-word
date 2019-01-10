@@ -21,16 +21,22 @@ import org.json.simple.parser.ParseException;
 
 public class ItemParser {
 	
-	private String PREFIX = "『LootWorld』";
+	private String PREFIX = "[LootWorld]";
+	
 	private String stringEnchantment;
 	
 	private Material material = Material.BED;
+	
 	private String name = material.toString();
 
 	private int amount = 1;
+	
 	private List<String> lore = new ArrayList<String>();
+	
 	private HashMap<String,Integer> enchantment = null;
+	
 	private float probability = 1f;
+	
 	private ArrayList<ItemConfig> items = new ArrayList<ItemConfig>();
 	
 	

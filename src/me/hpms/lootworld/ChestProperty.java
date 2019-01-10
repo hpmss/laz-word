@@ -2,12 +2,15 @@ package me.hpms.lootworld;
 
 import java.util.List;
 
+import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
 public class ChestProperty {
 	
 	private LootWorld plugin;
+	
+	private Block chest;
 	
 	private String rarity;
 	
@@ -18,13 +21,17 @@ public class ChestProperty {
 	private FixedMetadataValue metaData;
 	
 	
-	
-	public ChestProperty(LootWorld lw,String rarity,List<ItemStack> content,float probabilityDistribution,FixedMetadataValue metaData ) {
+	public ChestProperty(LootWorld lw,Block chest,String rarity,List<ItemStack> content,float probabilityDistribution,FixedMetadataValue metaData ) {
 		plugin = lw;
+		this.chest = chest;
 		this.rarity = rarity;
 		this.content = content;
 		this.probabilityDistribution = probabilityDistribution;
 		this.metaData = metaData;
+	}
+	
+	public Block getChestBlock() {
+		return chest;
 	}
 	
 	public String getRarity() {
