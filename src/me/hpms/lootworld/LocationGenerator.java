@@ -26,6 +26,8 @@ public class LocationGenerator {
 	
 	private LootWorld plugin;
 	
+	private final int maxChestPopulation = 1000;
+	
 	private List<Float> weight;
 	
 	private final float xOffset = 1000f;
@@ -100,7 +102,7 @@ public class LocationGenerator {
 		for(ChestRarity chest : constant) {
 			weight.add(chest.getChestProbability());
 		}
-		Log.info(weight);
+		
 	}
 	
 	
