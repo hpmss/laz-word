@@ -69,7 +69,8 @@ public class ItemParser {
 	public HashMap<Float,ItemStack> getRankAllItemsDistribution() {
 		HashMap<Float,ItemStack> items = new HashMap<Float,ItemStack>();
 		if(rankAllCounter != 0) {
-			float prob = 1 / rankAllCounter;
+			float prob = 1.0f / (float)rankAllCounter;
+			Log.info("Rank all prob: " + prob);
 			
 			for(ItemStack item : rankAllItems) {
 				items.put(prob, item);
@@ -103,7 +104,6 @@ public class ItemParser {
 							case "lore": this.lore = (List<String>) itemValue;break;
 							case "enchantment": this.stringEnchantment = itemValue.toString();this.enchantment = convertStringToHashMap(stringEnchantment);break;
 							case "rank": this.rank = itemValue.toString();break;
-								
 							}
 						}catch(NumberFormatException e) {
 							Log.info(PREFIX + "-> either \'amount\' have incorrect format...");

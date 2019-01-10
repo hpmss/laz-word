@@ -1,6 +1,7 @@
 package me.hpms.lootworld;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -39,7 +40,7 @@ public class ChestProperty {
 		this.probabilityDistribution = probabilityDistribution;
 		this.metaData = new FixedMetadataValue(plugin,rarity);
 		
-		loc.getBlock().setType(Material.CHEST);
+		this.loc.getBlock().setType(Material.CHEST);
 		
 		this.chest = (Chest) loc.getBlock().getState();
 		
@@ -88,9 +89,9 @@ public class ChestProperty {
 			}
 		}
 		
-		float probabilityRank = 1;
+		float probabilityRank = 1f;
 		if(rankItem.size() != 0) {
-			probabilityRank = 1 / rankItem.size();
+			probabilityRank = probabilityRank / (float)rankItem.size();
 		}
 		
 		for(ItemStack item : rankItem) {
@@ -100,6 +101,7 @@ public class ChestProperty {
 		double t = 0;
 		
 		for(int i = 0; i < itemAmount - 1 ; i ++) {
+			Collections.shuffle(plugin.getRankAllItems());
 			for(Entry<Float, ItemStack> item : plugin.getRankAllItemsDistribution().entrySet()) {
 				t += item.getKey();
 				double outcome = Math.random();
@@ -107,6 +109,7 @@ public class ChestProperty {
 					itemList.add(item.getValue());
 				}
 			}
+			t = 0;
 		}
 		
 		t = 0;
@@ -115,13 +118,13 @@ public class ChestProperty {
 			t += item.getKey();
 			double outcome = Math.random();
 			if(t >= outcome) {
+				Log.info("Bingo: " + item.getValue());
 				itemList.add(item.getValue());
 			}
 		}
 		for(ItemStack item : itemList) {
 			chest.getInventory().addItem(item);
 		}
-		Log.info(itemList);
 		
 		return itemList;
 		

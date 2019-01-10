@@ -10,7 +10,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class LootWorld extends JavaPlugin{
 	
-	
 	private File path = new File(getDataFolder() + "");
 	
 	private EventListener listener;
