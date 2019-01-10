@@ -18,6 +18,8 @@ import com.google.common.collect.Multiset.Entry;
 
 public class LocationGenerator {
 	
+	private Gaussian pdf;
+	
 	private final File locationFile;
 	
 	private FileConfiguration locationConfig;
@@ -104,8 +106,7 @@ public class LocationGenerator {
 		}
 		
 	}
-	
-	
+
 	public void generateLocation() {
 		
 	}

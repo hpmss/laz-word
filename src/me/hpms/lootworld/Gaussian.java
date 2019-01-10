@@ -22,7 +22,7 @@ package me.hpms.lootworld;
  *
  ******************************************************************************/
 
-
+/* This is the implementation of Normal Distribution to Java by Robert Sedgewick and Kevin Wayne. */
 public class Gaussian {
 	
 	 // return pdf(x) = standard Gaussian pdf
