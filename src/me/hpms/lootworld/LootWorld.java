@@ -17,6 +17,8 @@ public class LootWorld extends JavaPlugin{
 	
 	private LocationGenerator generator;
 	
+	private ChestRarity rarity;
+	
 	
 	@Override
 	public void onEnable() {
@@ -47,6 +49,10 @@ public class LootWorld extends JavaPlugin{
 	
 	public LocationGenerator getGenerator() {
 		return generator;
+	}
+	
+	public ChestRarity getChestRarity() {
+		return rarity;
 	}
 	
 	public void parseSourceFromJar(String pathToJar,BufferedWriter writer) {
