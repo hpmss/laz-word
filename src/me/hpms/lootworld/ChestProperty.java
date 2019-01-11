@@ -27,16 +27,19 @@ public class ChestProperty {
 	
 	private int itemAmount;
 	
+	private int itemAmountRank;
+	
 	private float probabilityDistribution;
 	
 	private FixedMetadataValue metaData;
 
 	
-	public ChestProperty(LootWorld lw,Location loc,String rarity,int itemAmount,float probabilityDistribution) {
+	public ChestProperty(LootWorld lw,Location loc,String rarity,int itemAmount,int itemAmountRank,float probabilityDistribution) {
 		plugin = lw;
 		this.loc = loc;
 		this.rarity = rarity;
 		this.itemAmount = itemAmount;
+		this.itemAmountRank = itemAmountRank;
 		this.probabilityDistribution = probabilityDistribution;
 		this.metaData = new FixedMetadataValue(plugin,rarity);
 		
@@ -81,7 +84,7 @@ public class ChestProperty {
 		
 		List<ItemStack> rankItem = new ArrayList<ItemStack>();
 		
-		HashMap<Float,ItemStack> mapRankItem = new HashMap<Float,ItemStack>();
+		
 		
 		for(ItemConfig item : plugin.getParsedItems()) {
 			if(item.getRank().equalsIgnoreCase(this.rarity)) {
@@ -94,13 +97,9 @@ public class ChestProperty {
 			probabilityRank = probabilityRank / (float)rankItem.size();
 		}
 		
-		for(ItemStack item : rankItem) {
-			mapRankItem.put(probabilityRank, item);
-		}
-		
 		double t = 0;
 		
-		for(int i = 0; i < itemAmount - 1 ; i ++) {
+		for(int i = 0; i < itemAmount; i ++) {
 			Collections.shuffle(plugin.getRankAllItems());
 			for(Entry<Float, ItemStack> item : plugin.getRankAllItemsDistribution().entrySet()) {
 				t += item.getKey();
@@ -113,15 +112,21 @@ public class ChestProperty {
 		}
 		
 		t = 0;
-		
-		for(Entry<Float,ItemStack> item : mapRankItem.entrySet()) {
-			t += item.getKey();
-			double outcome = Math.random();
-			if(t >= outcome) {
-				Log.info("Bingo: " + item.getValue());
-				itemList.add(item.getValue());
+		for(int i = 0; i < itemAmountRank ; i ++) {
+			HashMap<Float,ItemStack> mapRankItem = new HashMap<Float,ItemStack>();
+			Collections.shuffle(rankItem);
+			for(ItemStack item : rankItem) {
+				mapRankItem.put(probabilityRank, item);
+			}
+			for(Entry<Float,ItemStack> item : mapRankItem.entrySet()) {
+				t += item.getKey();
+				double outcome = Math.random();
+				if(t >= outcome) {			
+					itemList.add(item.getValue());
+				}
 			}
 		}
+		
 		for(ItemStack item : itemList) {
 			chest.getInventory().addItem(item);
 		}

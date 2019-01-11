@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -26,21 +27,29 @@ public class LocationGenerator {
 	
 	private FileConfiguration locationConfig;
 	
+	private FileConfiguration pluginConfig;
+	
 	private List<Location> location;
 	
 	private LootWorld plugin;
 	
-	private final int maxChestPopulation = 100;
+	private ChestRarity rarity;
 	
-	private final double positiveBoundary = 99984;
+	private final int maxChestPopulation;
 	
-	private final double negativeBoundary = -99984;
+	private final double positiveBoundary;
+	
+	private final double negativeBoundary;
 	
 	private final double maxHeight = 256;
 	
-	private final int maxItem = 5;
+	private final int maxItemAll;
 	
-	private final int minItem = 2;
+	private final int minItemAll;
+	
+	private final int maxItemRank;
+	
+	private final int minItemRank;
 	
 	
 	
@@ -48,6 +57,20 @@ public class LocationGenerator {
 		plugin = lw;
 		location = new ArrayList<Location>();
 		locationFile = new File(plugin.getDataFolder(), "location.yml");
+		pluginConfig = plugin.getConfig();
+		rarity = new ChestRarity(plugin);
+		Log.info(rarity.getRanking());
+		maxChestPopulation = pluginConfig.getInt("max-chest-population");
+		
+		positiveBoundary = pluginConfig.getInt("positive-boundary");
+		negativeBoundary = pluginConfig.getInt("negative-boundary");
+		
+		maxItemAll = pluginConfig.getInt("max-rank-all-item");
+		minItemAll = pluginConfig.getInt("min-rank-all-item");
+		
+		maxItemRank = pluginConfig.getInt("max-rank-item");
+		minItemRank = pluginConfig.getInt("min-rank-item");
+		
 		
 		loadConfiguration();
 		readConfigurationToLocation();
@@ -116,21 +139,21 @@ public class LocationGenerator {
 		
 	}
 	
-	
-	public ChestRarity generateChestType() {
-		Class<ChestRarity> rarity = ChestRarity.class;
-		ChestRarity[] chest = rarity.getEnumConstants();
+	public Entry<String,Float> generateChestType() {
+		
 		float t = 0;
-		for(ChestRarity c : chest) {
+		
+		for(Entry<String, Float> entry : rarity.getRanking().entrySet()) {
 			
-			float probability = c.getChestProbability();
+			float probability = entry.getValue();
 			t = t + probability;
 			
 			//Uniform distribution ranging from [0,1]
-			double outcome = Math.random() * 100;
+			double outcome = Math.random() * rarity.getTotalProbability();
 			
 			if(t >= outcome) {
-				return c;
+				Log.info(entry.getKey() + " : " + outcome);
+				return entry;
 			}	
 			
 		}
@@ -152,7 +175,9 @@ public class LocationGenerator {
 		
 		World world = Bukkit.getWorld("world");
 		for(int i = 0; i < maxChestPopulation; i++) {
-			int itemAmount = (int) (Math.random() * ((maxItem - minItem ) + 1)) + minItem;
+			
+			int itemAmountRank = (int) (Math.random() * ((maxItemRank - minItemRank) + 1)) + minItemRank;
+			int itemAmountAll = (int) (Math.random() * ((maxItemAll - minItemAll ) + 1)) + minItemAll;
 			
 			double x = (Math.random() * range) + negativeBoundary;
 			double y = (Math.random() * maxHeight) + 1;
@@ -183,10 +208,9 @@ public class LocationGenerator {
 			}
 			Location loc = new Location(world,x,y,z);
 			
+			Entry<String,Float> entry = generateChestType();
 			
-			ChestRarity entry = generateChestType();
-			
-			ChestProperty chest = new ChestProperty(plugin,loc,entry.getChestName(),itemAmount,entry.getChestProbability());
+			ChestProperty chest = new ChestProperty(plugin,loc,entry.getKey(),itemAmountAll,itemAmountRank,entry.getValue());
 			
 			String locString = loc.getX() + "," + loc.getY() + "," + loc.getZ() + "," + loc.getWorld().getName();
 			section.set(chest.getRarity() + "-" + String.valueOf(i), locString);

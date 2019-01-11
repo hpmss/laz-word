@@ -32,6 +32,8 @@ public class LootWorld extends JavaPlugin{
 		if(!getDataFolder().exists()) {
 			getDataFolder().mkdir();
 		}
+		getConfig().options().copyDefaults(true);
+		saveConfig();
 		parser = new ItemParser(path);
 		generator = new LocationGenerator(this);
 		listener = new EventListener(this);

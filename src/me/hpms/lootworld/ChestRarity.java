@@ -1,29 +1,90 @@
 package me.hpms.lootworld;
 
-public enum ChestRarity {
-	COMMON(47.5f,"Common"),
-	UNCOMMON(20f,"Uncommon"),
-	RARE(12f,"Rare"),
-	MYTHICAL(7f,"Mythical"),
-	LEGENDARY(5f,"Legendary"),
-	IMMORTAL(4f,"Immortal"),
-	ARCANA(2.75f,"Arcana"),
-	ANCIENT(1.75f,"Ancient");
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+
+import net.md_5.bungee.api.ChatColor;
+
+public class ChestRarity {
 	
-	private float probability;
-	private String name;
+	private final String PREFIX = ChatColor.GREEN + "『 LootWorld 』" + ChatColor.BLUE + "-> ";
 	
-	ChestRarity(float probability,String name) {
-		this.probability = probability;
-		this.name = name;
+	private LootWorld plugin;
+	
+	private FileConfiguration pluginConfig;
+	
+	private LinkedHashMap<String,Float> rank;
+	
+	private float totalProbability;
+	
+	public ChestRarity(LootWorld lw) {
+		plugin = lw;
+		pluginConfig = plugin.getConfig();
+		rank = new LinkedHashMap<String,Float>();
+		loadRank();
+		this.rank =  (LinkedHashMap<String, Float>) sortByValue(rank);
+		
 	}
 	
-	public String getChestName() {
-		return this.name;
+	public HashMap<String,Float> getRanking() {
+		return rank;
 	}
 	
-	public float getChestProbability() {
-		return this.probability;
+	public float getTotalProbability() {
+		return this.totalProbability;
+	}
+	
+	public float getProbability(String rankName) {
+		if(rank.containsKey(rankName)) {
+			float prob = rank.get(rankName);
+			return prob;
+		}else {
+			Bukkit.getConsoleSender().sendMessage(PREFIX + "Cannot parse probability for rank \'" + rankName + "\'");
+			return -1;
+		}
+		
+	}
+	
+	public <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
+        List<Entry<K, V>> list = new ArrayList<>(map.entrySet());
+        list.sort(Entry.comparingByValue());
+        Collections.reverse(list);
+
+        Map<K, V> result = new LinkedHashMap<>();
+        for (Entry<K, V> entry : list) {
+            result.put(entry.getKey(), entry.getValue());
+        }
+
+        return result;
+    }
+	
+	private void loadRank() {
+		
+		ConfigurationSection section = pluginConfig.getConfigurationSection("rank");
+		Map<String,Object> rankMap = section.getValues(false);
+		for(Entry<String,Object> entry : rankMap.entrySet()) {
+			try {
+				float prob = Float.parseFloat(entry.getValue().toString());
+				if(String.valueOf(prob).startsWith("0.")) {
+					prob = prob * 100;
+				}
+				totalProbability += prob;
+				rank.put(entry.getKey().toString(), prob);
+			}catch(NumberFormatException e ) {
+				Bukkit.getConsoleSender().sendMessage(PREFIX + "Cannot parse probability for rank \'" + entry.getKey() + "\'");
+			}	
+		}
+		
 	}
 	
 }
+	

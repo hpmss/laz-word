@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.libs.jline.internal.Log;
 import org.bukkit.inventory.ItemStack;
@@ -70,7 +71,6 @@ public class ItemParser {
 		HashMap<Float,ItemStack> items = new HashMap<Float,ItemStack>();
 		if(rankAllCounter != 0) {
 			float prob = 1.0f / (float)rankAllCounter;
-			Log.info("Rank all prob: " + prob);
 			
 			for(ItemStack item : rankAllItems) {
 				items.put(prob, item);
@@ -101,7 +101,7 @@ public class ItemParser {
 							case "name": this.name = itemValue.toString();break;
 							case "material": this.material = Material.valueOf(itemValue.toString());break;
 							case "amount": this.amount = Integer.parseInt(itemValue.toString());break;
-							case "lore": this.lore = (List<String>) itemValue;break;
+							case "lore": this.lore = convertColor((List<String>) itemValue);break;
 							case "enchantment": this.stringEnchantment = itemValue.toString();this.enchantment = convertStringToHashMap(stringEnchantment);break;
 							case "rank": this.rank = itemValue.toString();break;
 							}
@@ -220,6 +220,14 @@ public class ItemParser {
 				}
 			}
 		}
+	}
+	
+	public List<String> convertColor(List<String> list) {
+		List<String> converted = new ArrayList<String>();
+		for(String s : list) {
+			converted.add(ChatColor.translateAlternateColorCodes('&', s));
+		}
+		return converted;
 	}
 	
 	public void getJSONData(String fileToReadFromJar,BufferedWriter writer) {
