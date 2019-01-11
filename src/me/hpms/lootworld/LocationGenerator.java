@@ -14,7 +14,6 @@ import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.libs.jline.internal.Log;
 import org.bukkit.inventory.ItemStack;
 
 import net.md_5.bungee.api.ChatColor;
@@ -59,7 +58,6 @@ public class LocationGenerator {
 		locationFile = new File(plugin.getDataFolder(), "location.yml");
 		pluginConfig = plugin.getConfig();
 		rarity = new ChestRarity(plugin);
-		Log.info(rarity.getRanking());
 		maxChestPopulation = pluginConfig.getInt("max-chest-population");
 		
 		positiveBoundary = pluginConfig.getInt("positive-boundary");
@@ -148,11 +146,10 @@ public class LocationGenerator {
 			float probability = entry.getValue();
 			t = t + probability;
 			
-			//Uniform distribution ranging from [0,1]
+			//Uniform distribution ranging from [0,1]	
 			double outcome = Math.random() * rarity.getTotalProbability();
 			
 			if(t >= outcome) {
-				Log.info(entry.getKey() + " : " + outcome);
 				return entry;
 			}	
 			
@@ -164,16 +161,18 @@ public class LocationGenerator {
 	public void generateLocation() {
 		
 		if(location.size() == maxChestPopulation) {
-			Log.info(PREFIX + "Chest amount full-filled...");
+			Bukkit.getConsoleSender().sendMessage(PREFIX + "Chest amount full-filled...");
 			return;
 		}
-		Log.info(PREFIX + "Generating locations for chests...");
-		Log.info(PREFIX + "If this is your first time this may take a while depends on maxChestPopulation");
+		Bukkit.getConsoleSender().sendMessage(PREFIX + "Generating locations for chests...");
+		Bukkit.getConsoleSender().sendMessage(PREFIX + "If this is your first time this may take a while depends on maxChestPopulation");
+		Bukkit.getConsoleSender().sendMessage(PREFIX + "Consider change spigot.yml \'timeout\' property to higher if your server crash...");
 		ConfigurationSection section = locationConfig.getConfigurationSection("location");
 		double range = (positiveBoundary - negativeBoundary) + 1;
 		
 		
 		World world = Bukkit.getWorld("world");
+		
 		for(int i = 0; i < maxChestPopulation; i++) {
 			
 			int itemAmountRank = (int) (Math.random() * ((maxItemRank - minItemRank) + 1)) + minItemRank;

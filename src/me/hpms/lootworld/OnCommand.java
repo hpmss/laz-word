@@ -14,7 +14,6 @@ public class OnCommand implements CommandExecutor{
 			return false;
 		}
 		
-		Player p = (Player) sender;
 		
 		
 		return false;

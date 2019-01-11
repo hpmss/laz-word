@@ -13,9 +13,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.libs.jline.internal.Log;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -23,7 +23,7 @@ import org.json.simple.parser.ParseException;
 
 public class ItemParser {
 	
-	private String PREFIX = "[LootWorld]";
+	private final String PREFIX = ChatColor.GREEN + "『 LootWorld 』" + ChatColor.BLUE + "-> ";
 	
 	private String stringEnchantment;
 	
@@ -106,13 +106,13 @@ public class ItemParser {
 							case "rank": this.rank = itemValue.toString();break;
 							}
 						}catch(NumberFormatException e) {
-							Log.info(PREFIX + "-> either \'amount\' have incorrect format...");
+							Bukkit.getConsoleSender().sendMessage(PREFIX + "-> either \'amount\' have incorrect format...");
 							return;
 							
 						}catch(ClassCastException e) {
-							Log.info(PREFIX + "-> make sure \'material\' is valid...");
-							Log.info(PREFIX + "-> make sure \'enchantment\' has key(enchantment_name),value(level) format...");
-							Log.info(PREFIX + "-> make sure \'lore\' is a list of strings");
+							Bukkit.getConsoleSender().sendMessage(PREFIX + "-> make sure \'material\' is valid...");
+							Bukkit.getConsoleSender().sendMessage(PREFIX + "-> make sure \'enchantment\' has key(enchantment_name),value(level) format...");
+							Bukkit.getConsoleSender().sendMessage(PREFIX + "-> make sure \'lore\' is a list of strings");
 							e.printStackTrace();
 							return;
 						}
@@ -130,13 +130,13 @@ public class ItemParser {
 				}
 				
 			} catch (FileNotFoundException e) {
-				Log.info(PREFIX + "-> items.json is not found...");
+				Bukkit.getConsoleSender().sendMessage(PREFIX + "-> items.json is not found...");
 				return;
 			} catch (IOException e) {
-				Log.info(PREFIX + "-> items.json seems to be corrupted...");
+				Bukkit.getConsoleSender().sendMessage(PREFIX + "-> items.json seems to be corrupted...");
 				return;
 			} catch (ParseException e) {
-				Log.info(PREFIX + "-> items.json is unparsable...");
+				Bukkit.getConsoleSender().sendMessage(PREFIX + "-> items.json is unparsable...");
 				return;
 			}
 			
@@ -166,11 +166,11 @@ public class ItemParser {
 					try {
 						enchantment.put(entry[0].trim(), Integer.parseInt(entry[1].trim()));
 					}catch(NumberFormatException e) {
-						Log.info(PREFIX + "-> make sure level specified is a valid integer...");
+						Bukkit.getConsoleSender().sendMessage(PREFIX + "-> make sure level specified is a valid integer...");
 						e.printStackTrace();
 					}
 				}else {
-					Log.info(PREFIX + "-> level for \'" + entry[0] + "\' not specified ? ...");
+					Bukkit.getConsoleSender().sendMessage(PREFIX + "-> level for \'" + entry[0] + "\' not specified ? ...");
 				}
 			}
 		}
@@ -183,13 +183,13 @@ public class ItemParser {
 		BufferedWriter writer = null;
 		
 		if(fileEnchantment.exists()) {
-			Log.info( PREFIX + "-> enchantment.json already existed...");
+			Bukkit.getConsoleSender().sendMessage( PREFIX + "-> enchantment.json already existed...");
 		}else {
 			try {
 				fileEnchantment.createNewFile();
 				writer = new BufferedWriter(new FileWriter(fileEnchantment.getPath()));
 				getJSONData("enchantment.json",writer);
-				Log.info( PREFIX + "-> new enchantment.json file created...");
+				Bukkit.getConsoleSender().sendMessage( PREFIX + "-> new enchantment.json file created...");
 				
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -201,14 +201,14 @@ public class ItemParser {
 			}
 		}
 		if(fileItem.exists()) {
-			Log.info(PREFIX + "-> items.json already existed...");
+			Bukkit.getConsoleSender().sendMessage(PREFIX + "-> items.json already existed...");
 			return;
 		}else {
 			try {
 				fileItem.createNewFile();
 				writer = new BufferedWriter(new FileWriter(fileItem.getPath()));
 				getJSONData("items.json",writer);
-				Log.info(PREFIX + "-> new items.json file created...");
+				Bukkit.getConsoleSender().sendMessage(PREFIX + "-> new items.json file created...");
 				
 			} catch (IOException e) {
 				e.printStackTrace();
