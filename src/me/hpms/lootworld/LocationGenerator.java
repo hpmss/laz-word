@@ -17,6 +17,10 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import net.md_5.bungee.api.ChatColor;
 
+/* TODO 
+ * Add population for other worlds
+ * Save Metadata for chest
+ */
 public class LocationGenerator {
 	
 	private final String PREFIX = ChatColor.GREEN + "『 LootWorld 』" + ChatColor.BLUE + "-> ";
@@ -48,7 +52,6 @@ public class LocationGenerator {
 	private final int maxItemRank;
 	
 	private final int minItemRank;
-	
 	
 	
 	public LocationGenerator(LootWorld lw) {
@@ -130,11 +133,9 @@ public class LocationGenerator {
 	}
 	
 	public Entry<String,Float> generateChestType() {
-		
 		float t = 0;
 		
 		for(Entry<String, Float> entry : rarity.getRanking().entrySet()) {
-			
 			float probability = entry.getValue();
 			t = t + probability;
 			
@@ -144,14 +145,12 @@ public class LocationGenerator {
 			if(t >= outcome) {
 				return entry;
 			}	
-			
 		}
 		return null;
 		
 	}
 
 	public void generateLocation() {
-		
 		if(location.size() == maxChestPopulation) {
 			Bukkit.getConsoleSender().sendMessage(PREFIX + "Chest amount full-filled...");
 			return;
@@ -198,19 +197,14 @@ public class LocationGenerator {
 				
 			}
 			Location loc = new Location(world,x,y,z);
-			
 			Entry<String,Float> entry = generateChestType();
-			
 			ChestProperty chest = new ChestProperty(plugin,loc,entry.getKey(),itemAmountAll,itemAmountRank,entry.getValue());
-			
 			String locString = loc.getX() + "," + loc.getY() + "," + loc.getZ() + "," + loc.getWorld().getName();
 			section.set(chest.getRarity() + "-" + String.valueOf(i), locString);
 			saveConfiguration();
 			
 		}
 		readConfigurationToLocation();
-		
-		
 	}
 	
 }

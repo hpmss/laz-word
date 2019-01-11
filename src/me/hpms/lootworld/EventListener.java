@@ -12,6 +12,11 @@ import net.md_5.bungee.api.ChatColor;
 
 public class EventListener implements Listener {
 	
+	/* TODO 
+	 * Add effects and check for distance
+	 * 
+	 */
+	
 	private final String PREFIX = ChatColor.GREEN + "『 LootWorld 』" + ChatColor.BLUE + "-> ";
 
 	private LootWorld plugin;
