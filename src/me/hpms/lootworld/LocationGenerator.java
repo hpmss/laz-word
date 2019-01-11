@@ -14,7 +14,6 @@ import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.inventory.ItemStack;
 
 import net.md_5.bungee.api.ChatColor;
 
@@ -73,13 +72,6 @@ public class LocationGenerator {
 		loadConfiguration();
 		readConfigurationToLocation();
 		generateLocation();
-		for(ItemStack item : plugin.getRankAllItems()) {
-			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + item.toString());
-		}
-		for(ItemConfig item : plugin.getParsedItems()) {
-			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + item.getItem().toString());
-		}
-		
 		
 	}
 	
