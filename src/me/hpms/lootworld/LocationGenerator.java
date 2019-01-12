@@ -12,6 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.World.Environment;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -46,7 +47,9 @@ public class LocationGenerator {
 	
 	private final double negativeBoundary;
 	
-	private final double maxHeight = 256;
+	private double maxHeight = 256;
+	
+	private double minHeight = 1;
 	
 	private final int maxItemAll;
 	
@@ -173,6 +176,7 @@ public class LocationGenerator {
 		ConfigurationSection section = null;
 		List<Location> currentWorld = null;
 		for(Entry<String,Object> set : worlds.entrySet()) {
+			int counter = 1;
 			try {
 				currentWorld = location.get(set.getKey());
 				maxChestPopulation = Integer.parseInt(set.getValue().toString());
@@ -191,6 +195,15 @@ public class LocationGenerator {
 					Bukkit.getConsoleSender().sendMessage(PREFIX + "Chests generation for world " + "\'" + w.getName() + "\' full-filled...");
 					continue;
 				}
+				if(w.getEnvironment() == Environment.NETHER) {
+					maxHeight = 121;
+				}else {
+					maxHeight = 256;
+				}
+				if(w.getEnvironment() == Environment.THE_END) {
+					minHeight = 16;
+					Bukkit.getConsoleSender().sendMessage(PREFIX  + "GENERATING CHESTS FOR THE_END MAY TAKES MORE TIME !!!");
+				}
 				Bukkit.getConsoleSender().sendMessage(PREFIX + "Generating chests for world \'" + w.getName() + "\'");
 				for(int i = 0; i < maxChestPopulation; i++) {
 					
@@ -198,37 +211,59 @@ public class LocationGenerator {
 					int itemAmountAll = (int) (Math.random() * ((maxItemAll - minItemAll ) + 1)) + minItemAll;
 					
 					double x = (Math.random() * range) + negativeBoundary;
-					double y = (Math.random() * maxHeight) + 1;
+					double y = (Math.random() * ((maxHeight - minHeight) + 1)) + minHeight;
 					double z = (Math.random() * range) + negativeBoundary;
-					while(true) {
-						Location loc = new Location(w,x,y,z);
-						Bukkit.getConsoleSender().sendMessage(PREFIX + loc.toString());
-						if(loc.subtract(0, 1, 0).getBlock().getType() != Material.AIR && loc.subtract(0, 1, 0).getBlock().getType() != Material.WATER
-								&& loc.add(0, 1, 0).getBlock().getType() != Material.AIR && loc.add(0, 1, 0).getBlock().getType() != Material.WATER) {
-							if(loc.subtract(1, 0, 0).getBlock().getType() != Material.AIR && loc.subtract(1, 0, 0).getBlock().getType() != Material.WATER
-									&& loc.add(1, 0, 0).getBlock().getType() != Material.AIR && loc.add(1, 0, 0).getBlock().getType() != Material.WATER) {
-								if(loc.subtract(0, 0, 1).getBlock().getType() != Material.AIR && loc.subtract(0, 0, 1).getBlock().getType() != Material.WATER
-										&& loc.add(0,0,1).getBlock().getType() != Material.AIR && loc.add(0,0,1).getBlock().getType() != Material.WATER) {
-									break;
-								}else {
-									double newZ = (Math.random() * range) + negativeBoundary;
-									z = newZ;
+					if(w.getEnvironment() == Environment.THE_END) {
+						
+						while(true) {
+							Location loc = new Location(w,x,y,z);
+							Bukkit.getConsoleSender().sendMessage(PREFIX + loc.toString());
+							if(loc.subtract(0, 1, 0).getBlock().getType() != Material.AIR && loc.subtract(0, 1, 0).getBlock().getType() != Material.WATER
+									&& loc.add(0, 1, 0).getBlock().getType() != Material.AIR && loc.add(0, 1, 0).getBlock().getType() != Material.WATER) {
+								if(loc.subtract(1, 0, 0).getBlock().getType() != Material.AIR && loc.subtract(1, 0, 0).getBlock().getType() != Material.WATER
+										&& loc.add(1, 0, 0).getBlock().getType() != Material.AIR && loc.add(1, 0, 0).getBlock().getType() != Material.WATER) {
+									if(loc.subtract(0, 0, 1).getBlock().getType() != Material.AIR && loc.subtract(0, 0, 1).getBlock().getType() != Material.WATER
+											&& loc.add(0,0,1).getBlock().getType() != Material.AIR && loc.add(0,0,1).getBlock().getType() != Material.WATER) {
+										break;
+									}								
 								}
-							}else {
-								
-								double newX = (Math.random() * range) + negativeBoundary;
-								x = newX;
 							}
-						}else {
-							
+							double newX = (Math.random() * range) + negativeBoundary;
+							x = newX;
 							double newY = (Math.random() * maxHeight) + 1;
 							y = newY;
-								
+							double newZ = (Math.random() * range) + negativeBoundary;
+							z = newZ;
 						}
-						
+					}else {
+						while(true) {
+							Location loc = new Location(w,x,y,z);
+							if(loc.subtract(0, 1, 0).getBlock().getType() != Material.AIR && loc.subtract(0, 1, 0).getBlock().getType() != Material.WATER
+									&& loc.add(0, 1, 0).getBlock().getType() != Material.AIR && loc.add(0, 1, 0).getBlock().getType() != Material.WATER) {
+								if(loc.subtract(1, 0, 0).getBlock().getType() != Material.AIR && loc.subtract(1, 0, 0).getBlock().getType() != Material.WATER
+										&& loc.add(1, 0, 0).getBlock().getType() != Material.AIR && loc.add(1, 0, 0).getBlock().getType() != Material.WATER) {
+									if(loc.subtract(0, 0, 1).getBlock().getType() != Material.AIR && loc.subtract(0, 0, 1).getBlock().getType() != Material.WATER
+											&& loc.add(0,0,1).getBlock().getType() != Material.AIR && loc.add(0,0,1).getBlock().getType() != Material.WATER) {
+										break;
+									}else {
+										double newZ = (Math.random() * range) + negativeBoundary;
+										z = newZ;
+									}
+								}else {
+									double newX = (Math.random() * range) + negativeBoundary;
+									x = newX;
+								}	
+							}else {
+								double newY = (Math.random() * maxHeight) + 1;
+								y = newY;
+							}
+						}
 					}
 					Location loc = new Location(w,x,y,z);
-					
+					counter += 1;
+					if(counter % 100 == 0) {
+						Bukkit.getConsoleSender().sendMessage(PREFIX + " " + counter + " chests generated...");
+					}
 					Entry<String,Float> entry = generateChestType();
 					ChestProperty chest = new ChestProperty(plugin,loc,entry.getKey(),itemAmountAll,itemAmountRank,entry.getValue());
 					String locString = loc.getX() + "," + loc.getY() + "," + loc.getZ() + "," + loc.getWorld().getName();
@@ -241,5 +276,6 @@ public class LocationGenerator {
 		}
 		readConfigurationToLocation();
 	}
+	
 	
 }
