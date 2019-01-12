@@ -11,3 +11,7 @@ rank:
   Mythical: 10
   Legendary: 9
   Arcana: 6
+worlds:
+  world: 1000
+  world_nether: 1000
+  world_the_end: 1000
