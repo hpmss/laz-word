@@ -1,5 +1,6 @@
 package me.hpms.lootworld;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,18 +10,24 @@ import java.util.Map.Entry;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Chest;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
-public class ChestProperty {
+@SuppressWarnings("serial")
+public class ChestProperty implements Serializable{
 	
 	private LootWorld plugin;
 	
 	private Location loc;
+
+	private ConfigurationSection section;
 	
 	private Chest chest;
 	
 	private String rarity;
+	
+	private String currentChest;
 	
 	private List<ItemStack> content;
 	
@@ -33,7 +40,7 @@ public class ChestProperty {
 	private FixedMetadataValue metaData;
 
 	
-	public ChestProperty(LootWorld lw,Location loc,String rarity,int itemAmount,int itemAmountRank,float probabilityDistribution) {
+	public ChestProperty(LootWorld lw,Location loc,String rarity,int itemAmount,int itemAmountRank,float probabilityDistribution,ConfigurationSection section,String currentChest) {
 		plugin = lw;
 		this.loc = loc;
 		this.rarity = rarity;
@@ -41,6 +48,8 @@ public class ChestProperty {
 		this.itemAmountRank = itemAmountRank;
 		this.probabilityDistribution = probabilityDistribution;
 		this.metaData = new FixedMetadataValue(plugin,rarity);
+		this.section = section;
+		this.currentChest = currentChest;
 		
 		this.loc.getBlock().setType(Material.CHEST);
 		
@@ -77,6 +86,12 @@ public class ChestProperty {
 		return this.plugin;
 	}
 	
+	public void saveChest() {
+		String locString = loc.getX() + "," + loc.getY() + "," + loc.getZ() + "," + loc.getWorld().getName();
+		section.set(getRarity() + "-" + currentChest, locString);
+		
+	}
+	
 	private List<ItemStack> populateChestItem() {
 		
 		List<ItemStack> itemList = new ArrayList<ItemStack>();
@@ -96,9 +111,10 @@ public class ChestProperty {
 			probabilityRank = probabilityRank / (float)rankItem.size();
 		}
 		
-		double t = 0;
+		
 		
 		for(int i = 0; i < itemAmount; i ++) {
+			double t = 0;
 			Collections.shuffle(plugin.getRankAllItems());
 			for(Entry<Float, ItemStack> item : plugin.getRankAllItemsDistribution().entrySet()) {
 				t += item.getKey();
@@ -107,11 +123,10 @@ public class ChestProperty {
 					itemList.add(item.getValue());
 				}
 			}
-			t = 0;
 		}
 		
-		t = 0;
 		for(int i = 0; i < itemAmountRank ; i ++) {
+			double t = 0;
 			HashMap<Float,ItemStack> mapRankItem = new HashMap<Float,ItemStack>();
 			Collections.shuffle(rankItem);
 			for(ItemStack item : rankItem) {

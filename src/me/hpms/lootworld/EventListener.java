@@ -1,9 +1,12 @@
 package me.hpms.lootworld;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.bukkit.Material;
 import org.bukkit.block.Chest;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -21,9 +24,12 @@ public class EventListener implements Listener {
 
 	private LootWorld plugin;
 	
+	private List<String> rank;
+	
 	
 	public EventListener(LootWorld lw) {
 		plugin = lw;
+		rank = new ArrayList<>(plugin.getChestRarity().getRanking().keySet());
 		
 	}
 	
@@ -32,6 +38,7 @@ public class EventListener implements Listener {
 		if(e.getClickedBlock() == null) {
 			return;
 		}
+		Player p = e.getPlayer();
 		if(e.getClickedBlock().getType() == Material.GRASS) {
 			Collections.shuffle(plugin.getRankAllItems());
 			e.getPlayer().getInventory().addItem(plugin.getRankAllItems().get(0));
@@ -43,5 +50,7 @@ public class EventListener implements Listener {
 			}
 		}
 	}
+	
+	
 
 }

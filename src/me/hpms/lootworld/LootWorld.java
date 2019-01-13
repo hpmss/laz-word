@@ -27,15 +27,23 @@ public class LootWorld extends JavaPlugin{
 		
 	}
 	
+	@Override
+	public void onDisable() {
+		saveConfig();
+	}
+	
 	public void instantiateLootWorld() {
 		
 		if(!getDataFolder().exists()) {
 			getDataFolder().mkdir();
 		}
+		if(!(new File(getDataFolder().getPath(),"config.yml").exists())){
+			saveDefaultConfig();
+			saveConfig();
+	    }
 		listener = new EventListener(this);
 		getServer().getPluginManager().registerEvents(listener, this);	
-		getConfig().options().copyDefaults(true);
-		saveConfig();
+		getConfig().options().copyDefaults(false);
 		parser = new ItemParser(path);
 		generator = new LocationGenerator(this);
 		
