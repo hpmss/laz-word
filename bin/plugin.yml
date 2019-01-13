@@ -3,3 +3,7 @@ name: LootWorld
 author: hpms
 version: 1.0
 description: nani kode
+commands:
+    lwtest:
+         Description: Debugging
+         usage: /lwtest

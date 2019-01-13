@@ -4,14 +4,24 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Chest;
+import org.bukkit.craftbukkit.libs.jline.internal.Log;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 
+import me.hpms.lootworld.CustomEntityMob.EntityTypes;
 import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_12_R1.World;
 
 public class EventListener implements Listener {
 	
@@ -30,8 +40,18 @@ public class EventListener implements Listener {
 	public EventListener(LootWorld lw) {
 		plugin = lw;
 		rank = new ArrayList<>(plugin.getChestRarity().getRanking().keySet());
+		Log.info(rank);
 		
 	}
+	
+	public static boolean isEmpty(Inventory inv) {
+	    for (ItemStack item : inv.getContents()) {
+	      if (item != null) {
+	        return false;
+	      }
+	    }
+	    return true;
+	  }
 	
 	@EventHandler
 	public void onPlayerInteractEvent(PlayerInteractEvent e) {
@@ -40,14 +60,37 @@ public class EventListener implements Listener {
 		}
 		Player p = e.getPlayer();
 		if(e.getClickedBlock().getType() == Material.GRASS) {
+			EntityTypes.spawnEntity(new CustomEntityMob((World) Bukkit.getWorld("world")), new Location(Bukkit.getWorld("world"), e.getClickedBlock().getX(), e.getClickedBlock().getY(), e.getClickedBlock().getZ()));
 			Collections.shuffle(plugin.getRankAllItems());
-			e.getPlayer().getInventory().addItem(plugin.getRankAllItems().get(0));
+			p.getInventory().addItem(plugin.getRankAllItems().get(0));
 		}
 		if(e.getClickedBlock().getType() == Material.CHEST) {
 			Chest chest = (Chest) e.getClickedBlock().getState();
 			if(chest.hasMetadata("Common")) {
-				e.getPlayer().sendMessage(PREFIX + "Chest opened..");
+				p.sendMessage(PREFIX + "Chest opened..");
 			}
+		}
+	}
+	
+	@EventHandler
+	public void onInventoryCloseEvent(InventoryCloseEvent e) {
+		
+		Inventory inv = e.getInventory();
+		
+		if(inv.getHolder() instanceof Chest) {
+			for(String s : rank) {
+				if(inv.getLocation().getBlock().hasMetadata(s) && isEmpty(inv)) {
+					inv.getLocation().getBlock().setType(Material.AIR);
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onBlockPlaceEvent(BlockPlaceEvent e) {
+		if(e.getItemInHand() instanceof Chest) return;
+		if(e.getItemInHand().getItemMeta().getDisplayName().equalsIgnoreCase("lwtest")) {
+			e.getBlockPlaced().setMetadata("Common", new FixedMetadataValue(plugin,"Common"));
 		}
 	}
 	

@@ -37,15 +37,17 @@ public class LootWorld extends JavaPlugin{
 		if(!getDataFolder().exists()) {
 			getDataFolder().mkdir();
 		}
+		this.getCommand("lwtest").setExecutor(new OnCommand());
 		if(!(new File(getDataFolder().getPath(),"config.yml").exists())){
 			saveDefaultConfig();
 			saveConfig();
 	    }
-		listener = new EventListener(this);
-		getServer().getPluginManager().registerEvents(listener, this);	
 		getConfig().options().copyDefaults(false);
 		parser = new ItemParser(path);
 		generator = new LocationGenerator(this);
+		rarity = new ChestRarity(this);
+		listener = new EventListener(this);
+		getServer().getPluginManager().registerEvents(listener, this);	
 		
 		
 		
