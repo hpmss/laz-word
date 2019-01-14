@@ -5,6 +5,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.libs.jline.internal.Log;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -20,12 +22,14 @@ public class LootWorld extends JavaPlugin{
 	
 	private ChestRarity rarity;
 	
+	private NMSEntity nms;
+	
 	
 	@Override
 	public void onEnable() {
 		instantiateLootWorld();
-		
 	}
+	
 	
 	@Override
 	public void onDisable() {
@@ -43,6 +47,7 @@ public class LootWorld extends JavaPlugin{
 			saveConfig();
 	    }
 		getConfig().options().copyDefaults(false);
+		nms = new NMSEntity();
 		parser = new ItemParser(path);
 		generator = new LocationGenerator(this);
 		rarity = new ChestRarity(this);

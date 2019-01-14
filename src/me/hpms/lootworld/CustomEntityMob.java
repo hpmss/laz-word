@@ -1,117 +1,95 @@
 package me.hpms.lootworld;
 
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Map;
+import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.EntityShootBowEvent;
 
-import org.bukkit.Location;
-
-import net.minecraft.server.v1_12_R1.Entity;
+import net.minecraft.server.v1_12_R1.Blocks;
+import net.minecraft.server.v1_12_R1.DifficultyDamageScaler;
+import net.minecraft.server.v1_12_R1.EntityArrow;
+import net.minecraft.server.v1_12_R1.EntityCreeper;
 import net.minecraft.server.v1_12_R1.EntityHuman;
-import net.minecraft.server.v1_12_R1.EntityIronGolem;
-import net.minecraft.server.v1_12_R1.EntitySpider;
+import net.minecraft.server.v1_12_R1.EntityLiving;
+import net.minecraft.server.v1_12_R1.EntitySkeleton;
+import net.minecraft.server.v1_12_R1.EntityTippedArrow;
 import net.minecraft.server.v1_12_R1.EntityZombie;
+import net.minecraft.server.v1_12_R1.EnumItemSlot;
+import net.minecraft.server.v1_12_R1.GenericAttributes;
+import net.minecraft.server.v1_12_R1.GroupDataEntity;
+import net.minecraft.server.v1_12_R1.IRangedEntity;
+import net.minecraft.server.v1_12_R1.ItemStack;
+import net.minecraft.server.v1_12_R1.Items;
+import net.minecraft.server.v1_12_R1.MathHelper;
+import net.minecraft.server.v1_12_R1.PathfinderGoalArrowAttack;
 import net.minecraft.server.v1_12_R1.PathfinderGoalFloat;
-import net.minecraft.server.v1_12_R1.PathfinderGoalHurtByTarget;
 import net.minecraft.server.v1_12_R1.PathfinderGoalLookAtPlayer;
-import net.minecraft.server.v1_12_R1.PathfinderGoalMeleeAttack;
-import net.minecraft.server.v1_12_R1.PathfinderGoalMoveThroughVillage;
 import net.minecraft.server.v1_12_R1.PathfinderGoalMoveTowardsRestriction;
 import net.minecraft.server.v1_12_R1.PathfinderGoalNearestAttackableTarget;
 import net.minecraft.server.v1_12_R1.PathfinderGoalRandomLookaround;
-import net.minecraft.server.v1_12_R1.PathfinderGoalRandomStroll;
-import net.minecraft.server.v1_12_R1.PathfinderGoalSelector;
+import net.minecraft.server.v1_12_R1.PathfinderGoalRandomStrollLand;
+import net.minecraft.server.v1_12_R1.SoundEffects;
 import net.minecraft.server.v1_12_R1.World;
 
-public class CustomEntityMob extends EntityZombie{
-	
-	
-	public enum EntityTypes
-	{
-	    //NAME("Entity name", Entity ID, yourcustomclass.class);
-	    CUSTOM_ENTITY("Zombie", 54, CustomEntityMob.class); //You can add as many as you want.
+public class CustomEntityMob extends EntityZombie implements IRangedEntity{
 
-	    private EntityTypes(String name, int id, Class<? extends Entity> custom)
-	    {
-	        addToMaps(custom, name, id);
-	    }
-
-	  public static void spawnEntity(Entity entity, Location loc)
-	   {
-	     entity.setLocation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
-	     ((World) loc.getWorld()).addEntity(entity);
-	   }
-		@SuppressWarnings("rawtypes")
-		public static Object getField(String f,Class cl , Object object) {
-			
-			Field field;
-			Object obj = null;
-			try {
-				field = cl.getDeclaredField(f);
-				field.setAccessible(true);
-				obj = field.get(object);
-			}catch(NoSuchFieldException e) {
-				e.printStackTrace();
-			}catch(IllegalAccessException e) {
-				e.printStackTrace();
-			}
-			return obj;
-		}
-
-	    @SuppressWarnings({ "unchecked", "rawtypes" })
-		private static void addToMaps(Class clazz, String name, int id)
-	    {
-	        //getPrivateField is the method from above.
-	        //Remove the lines with // in front of them if you want to override default entities (You'd have to remove the default entity from the map first though).
-	        ((Map)getField("c", net.minecraft.server.v1_12_R1.EntityTypes.class, null)).put(name, clazz);
-	        ((Map)getField("d", net.minecraft.server.v1_12_R1.EntityTypes.class, null)).put(clazz, name);
-	        //((Map)getPrivateField("e", net.minecraft.server.v1_7_R4.EntityTypes.class, null)).put(Integer.valueOf(id), clazz);
-	        ((Map)getField("f", net.minecraft.server.v1_12_R1.EntityTypes.class, null)).put(clazz, Integer.valueOf(id));
-	        //((Map)getPrivateField("g", net.minecraft.server.v1_7_R4.EntityTypes.class, null)).put(name, Integer.valueOf(id));
-	    }
-	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public CustomEntityMob(World world) {
 		super(world);
-		List goalB = (List)getField("b",PathfinderGoalSelector.class,goalSelector);
-		goalB.clear();
-		List goalC = (List)getField("c",PathfinderGoalSelector.class,goalSelector);
-		goalC.clear();
-		List targetB = (List)getField("b",PathfinderGoalSelector.class,targetSelector);
-		targetB.clear();
-		List targetC = (List)getField("c",PathfinderGoalSelector.class,targetSelector);
-		targetC.clear();
-		
-		this.goalSelector.a(0, new PathfinderGoalFloat(this));
-        this.goalSelector.a(2, new PathfinderGoalMeleeAttack(this, 1.0D, false));
-        this.goalSelector.a(4, new PathfinderGoalMeleeAttack(this, 1.0D, true));
-        this.goalSelector.a(5, new PathfinderGoalMoveTowardsRestriction(this, 1.0D));
-        this.goalSelector.a(6, new PathfinderGoalMoveThroughVillage(this, 1.0D, false));
-        this.goalSelector.a(7, new PathfinderGoalRandomStroll(this, 1.0D));
-        this.goalSelector.a(8, new PathfinderGoalLookAtPlayer(this, EntityHuman.class, 8.0F));
-        this.goalSelector.a(8, new PathfinderGoalRandomLookaround(this));
-        this.targetSelector.a(1, new PathfinderGoalHurtByTarget(this, true));
-        this.targetSelector.a(2, new PathfinderGoalNearestAttackableTarget(this, EntitySpider.class, true));
-        this.targetSelector.a(2, new PathfinderGoalNearestAttackableTarget(this, EntityIronGolem.class, false));
-		
 	}
 	
-	@SuppressWarnings("rawtypes")
-	public static Object getField(String f,Class cl , Object object) {
-		
-		Field field;
-		Object obj = null;
-		try {
-			field = cl.getDeclaredField(f);
-			field.setAccessible(true);
-			obj = field.get(object);
-		}catch(NoSuchFieldException e) {
-			e.printStackTrace();
-		}catch(IllegalAccessException e) {
-			e.printStackTrace();
-		}
-		return obj;
+	@Override
+	protected void r() {
+		this.goalSelector.a(0,new PathfinderGoalFloat(this));
+		this.goalSelector.a(2,new PathfinderGoalArrowAttack(this,1.0,12,20));
+		this.targetSelector.a(3,new PathfinderGoalNearestAttackableTarget<>(this,EntityCreeper.class,true));
+		this.targetSelector.a(3, new PathfinderGoalNearestAttackableTarget<>(this,EntitySkeleton.class,true));
+		this.goalSelector.a(5,new PathfinderGoalMoveTowardsRestriction(this,1.0));
+		this.goalSelector.a(7,new PathfinderGoalRandomStrollLand(this,1.0));
+		this.goalSelector.a(8,new PathfinderGoalLookAtPlayer(this,EntityHuman.class,8.0f));
+		this.goalSelector.a(8,new PathfinderGoalRandomLookaround(this));
 	}
+	
+	
+	@Override
+	public void a(final EntityLiving target, final float f) {
+	    final EntityArrow entityarrow = this.prepareProjectile(f);
+	    final double motX = target.locX - this.locX;
+	    final double motY = target.getBoundingBox().b + target.length / 3.0f - entityarrow.locY;
+	    final double motZ = target.locZ - this.locZ;
+	    final double horizontalMot = MathHelper.sqrt(motX * motX + motZ * motZ);
+	    entityarrow.shoot(motX, motY + horizontalMot * 0.2, motZ, 1.6f, 14 - world.getDifficulty().a() * 4);
+	    final EntityShootBowEvent event = CraftEventFactory.callEntityShootBowEvent(this, this.getItemInMainHand(),
+	                entityarrow, 0.8f);
+	    if (event.isCancelled()) {
+	        event.getProjectile().remove();
+	        return;
+	    }
+	    if (event.getProjectile() == entityarrow.getBukkitEntity()) {
+	        this.world.addEntity(entityarrow);
+	    }
+	    this.a(SoundEffects.fV, 1.0f, 1.0f / (this.getRandom().nextFloat() * 0.4f + 0.8f));
+	}
+
+	protected EntityArrow prepareProjectile(final float unknown) {
+	    final EntityArrow arrow = new EntityTippedArrow(this.world, this);
+	    arrow.a(this, unknown);
+	    return arrow;
+	}
+	
+	@Override
+	public GroupDataEntity prepare(DifficultyDamageScaler dds,GroupDataEntity gde) {
+		gde = super.prepare(dds, gde);
+		this.setSlot(EnumItemSlot.MAINHAND, new ItemStack(Items.BOW));
+		this.setSlot(EnumItemSlot.HEAD, new ItemStack(Blocks.PUMPKIN));
+		return gde;
+	}
+	
+	@Override
+	protected void initAttributes() {
+		super.initAttributes();
+		this.getAttributeInstance(GenericAttributes.maxHealth).setValue(40.0);
+		this.getAttributeInstance(GenericAttributes.h).setValue(5.0);
+	}
+	
+	
+	
 
 }

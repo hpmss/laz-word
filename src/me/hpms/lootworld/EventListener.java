@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Chest;
 import org.bukkit.craftbukkit.libs.jline.internal.Log;
@@ -19,9 +17,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
-import me.hpms.lootworld.CustomEntityMob.EntityTypes;
 import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_12_R1.World;
 
 public class EventListener implements Listener {
 	
@@ -60,7 +56,6 @@ public class EventListener implements Listener {
 		}
 		Player p = e.getPlayer();
 		if(e.getClickedBlock().getType() == Material.GRASS) {
-			EntityTypes.spawnEntity(new CustomEntityMob((World) Bukkit.getWorld("world")), new Location(Bukkit.getWorld("world"), e.getClickedBlock().getX(), e.getClickedBlock().getY(), e.getClickedBlock().getZ()));
 			Collections.shuffle(plugin.getRankAllItems());
 			p.getInventory().addItem(plugin.getRankAllItems().get(0));
 		}
