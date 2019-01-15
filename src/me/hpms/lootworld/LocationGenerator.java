@@ -199,6 +199,7 @@ public class LocationGenerator {
 		Location loc;
 		int itemAmountRank;
 		int itemAmountAll;
+		Entry<String,Float> entry;
 		for(Entry<String,Object> set : worlds.entrySet()) {
 			try {
 				currentWorld = location.get(set.getKey());
@@ -289,7 +290,8 @@ public class LocationGenerator {
 					if(currentCounter % 100 == 0) {
 						Bukkit.getConsoleSender().sendMessage(PREFIX + " " + currentCounter + " chests generated...");
 					}
-					ChestProperty chest = new ChestProperty(plugin,loc,generateChestType().getKey(),itemAmountAll,itemAmountRank,generateChestType().getValue(),section,String.valueOf(currentCounter));
+					entry = generateChestType();
+					ChestProperty chest = new ChestProperty(plugin,loc,entry.getKey(),itemAmountAll,itemAmountRank,entry.getValue(),section,String.valueOf(currentCounter));
 					chest.saveChest();
 					location.get(set.getKey()).add(loc);
 				}
