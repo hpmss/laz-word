@@ -2,11 +2,11 @@ package me.hpms.lootworld;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 
-import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.libs.jline.internal.Log;
+import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -49,15 +49,35 @@ public class LootWorld extends JavaPlugin{
 		
 		
 		nms = new NMSEntity();
+		registerEntities();
 		parser = new ItemParser(path);
 		generator = new LocationGenerator(this);
 		rarity = new ChestRarity(this);
 		listener = new EventListener(this);
 		getServer().getPluginManager().registerEvents(listener, this);	
 		
-		
-		
-		
+	}
+	
+	public void registerEntities() {
+		try {
+			nms.registerEntity(EntityType.ZOMBIE, "ranged_zombie", CustomEntityMob.class);
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public List<ItemConfig> getParsedItems() {
@@ -82,6 +102,10 @@ public class LootWorld extends JavaPlugin{
 	
 	public ChestRarity getChestRarity() {
 		return rarity;
+	}
+	
+	public NMSEntity getNMSEntity() {
+		return nms;
 	}
 	
 	public void parseSourceFromJar(String pathToJar,BufferedWriter writer) {

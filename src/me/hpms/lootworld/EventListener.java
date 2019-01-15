@@ -63,9 +63,11 @@ public class EventListener implements Listener {
 			Chest chest = (Chest) e.getClickedBlock().getState();
 			if(chest.hasMetadata("Common")) {
 				p.sendMessage(PREFIX + "Chest opened..");
+				plugin.getNMSEntity().spawnEntity(e.getClickedBlock().getWorld(), e.getClickedBlock().getLocation());
 			}
 		}
 	}
+
 	
 	@EventHandler
 	public void onInventoryCloseEvent(InventoryCloseEvent e) {
