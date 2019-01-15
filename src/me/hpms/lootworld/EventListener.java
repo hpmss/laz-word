@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.bukkit.Material;
 import org.bukkit.block.Chest;
-import org.bukkit.craftbukkit.libs.jline.internal.Log;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -36,7 +35,6 @@ public class EventListener implements Listener {
 	public EventListener(LootWorld lw) {
 		plugin = lw;
 		rank = new ArrayList<>(plugin.getChestRarity().getRanking().keySet());
-		Log.info(rank);
 		
 	}
 	

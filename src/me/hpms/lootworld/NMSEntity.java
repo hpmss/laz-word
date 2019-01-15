@@ -9,7 +9,6 @@ import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.libs.jline.internal.Log;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
@@ -19,10 +18,9 @@ public final class NMSEntity {
 	
 	/**
 	 * @author hpms
-	 * -> This is written using only reflection for multiple versions compatibility
+	 * -> This class is written using only reflection for multiple versions compatibility
 	 * -> Feel free to use how ever you like
 	 */
-	
 	
 	private final String NMSString;
 	
@@ -51,7 +49,7 @@ public final class NMSEntity {
 		this.OGCString = packageNameOGC;
 		
 		try {
-			craftWorld = Class.forName(packageNameOGC + ".CraftWorld");
+			craftWorld = Class.forName(OGCString + ".CraftWorld");
 			minecraftKey = Class.forName(NMSString  + ".MinecraftKey");
 			entityTypes = Class.forName(NMSString + ".EntityTypes");
 			genericAttributes = Class.forName(NMSString + ".GenericAttributes");
@@ -120,10 +118,6 @@ public final class NMSEntity {
 			entity.setLocation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
 			Method addEntity = castedCraftWorld.getClass().getMethod("addEntity", Class.forName(NMSString + ".Entity"),SpawnReason.class);
 			addEntity.invoke(castedCraftWorld, entity,CreatureSpawnEvent.SpawnReason.CUSTOM);
-			
-			//Debug
-			Log.info(castCraftWorld(w).toString());
-			Log.info(entity);
 		} catch (NoSuchMethodException e) {
 			e.printStackTrace();
 		} catch (SecurityException e) {
@@ -183,7 +177,7 @@ public final class NMSEntity {
 	 * -----
 	 * Enum for accessing Entity wearing slots.
 	 * -----
-	 * @getValue() -> @return Entity's slot for manipulating wears.
+	 * @getValue() -> @return Entity's slot for manipulating wears <T> should be EnumItemSlot.
 	 */
 	public enum NMSEntitySlot {
 		MAIN_HAND("MAINHAND"),
