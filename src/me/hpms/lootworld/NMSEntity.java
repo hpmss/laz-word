@@ -28,14 +28,14 @@ public final class NMSEntity {
 		this.NMSString = packageName;
 		
 		try {
-			minecraftKey = Class.forName(packageName  + ".MinecraftKey");
-			entityTypes = Class.forName(packageName + ".EntityTypes");
+			minecraftKey = Class.forName(NMSString  + ".MinecraftKey");
+			entityTypes = Class.forName(NMSString + ".EntityTypes");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 		
 		try {
-			registerEntity(1,"hpms",CustomEntityMob.class);
+			registerEntity(54,"zombie",CustomEntityMob.class);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -43,20 +43,29 @@ public final class NMSEntity {
 	
 	
 	@SuppressWarnings("unchecked")
-	public void registerEntity(final int id,final String name,final Class<?> clazz) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, InstantiationException, NoSuchFieldException {
+	public void registerEntity(final int id,final String name,final Class<?> clazz) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, InstantiationException, NoSuchFieldException, ClassNotFoundException {
 		
 		Object key = null;
 		Object a = null;
 		Method register = null;
 		Constructor keyConstructor = minecraftKey.getConstructor(String.class);
+		//MinecraftKey key = new MinecraftKey(key_name)
 		key = keyConstructor.newInstance(name);
 		
+		//Get method 'a' to register entity
 		a = getField("b",entityTypes,a);
+		Object b_registryMaterials = entityTypes.getField("b").get(entityTypes);
+		//Register to current set of keys
 		register = a.getClass().getMethod("a",int.class,Object.class ,Object.class);
-		register.invoke(entityTypes.getField("b"),id, name,clazz);
-
+		register.invoke(b_registryMaterials ,id, name,clazz);
 		
-		
+		//Set of minecraft-key ( entities key -> example: minecraft:squid )
+		//Adding key if not exist
+		Set minecraftKeySet = (Set) entityTypes.getField("d").get(entityTypes);
+		if(!minecraftKeySet.contains(key)) {
+			minecraftKeySet.add(key);
+		}
+		Log.info(minecraftKeySet);
 		
 	}
 	

@@ -37,16 +37,17 @@ public class LootWorld extends JavaPlugin{
 	}
 	
 	public void instantiateLootWorld() {
-		
-		if(!getDataFolder().exists()) {
-			getDataFolder().mkdir();
-		}
-		this.getCommand("lwtest").setExecutor(new OnCommand());
 		if(!(new File(getDataFolder().getPath(),"config.yml").exists())){
 			saveDefaultConfig();
 			saveConfig();
 	    }
-		getConfig().options().copyDefaults(false);
+		saveConfig();
+		if(!getDataFolder().exists()) {
+			getDataFolder().mkdir();
+		}
+		this.getCommand("lwtest").setExecutor(new OnCommand());
+		
+		
 		nms = new NMSEntity();
 		parser = new ItemParser(path);
 		generator = new LocationGenerator(this);
