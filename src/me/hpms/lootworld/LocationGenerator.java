@@ -21,7 +21,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import net.md_5.bungee.api.ChatColor;
 
 /* TODO 
- * Save Metadata for chest
+ * Update location.yml on chest open
  */
 public class LocationGenerator {
 	
