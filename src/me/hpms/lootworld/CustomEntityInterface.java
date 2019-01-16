@@ -1,8 +1,12 @@
 package me.hpms.lootworld;
 
+import org.bukkit.entity.EntityType;
+
 public class CustomEntityInterface {
 	
 	private LootWorld plugin;
+	
+	private EntityType type;
 	
 	private final float health;
 	
@@ -27,11 +31,12 @@ public class CustomEntityInterface {
 	private final float luck;
 	
 	
-	public CustomEntityInterface(LootWorld lw,float health,double followRange,double knockbackResistance,
+	public CustomEntityInterface(LootWorld lw,EntityType type,float health,double followRange,double knockbackResistance,
 			double movementSpeed,double flyingSpeed
 			,double attackDamage,double attackSpeed,double armor,
 			double armorDurability,float armorPiercingLevel,float luck) {
 		this.plugin = lw;
+		this.type = type;
 		this.health = health;
 		this.followRange = followRange;
 		this.knockbackResistance = knockbackResistance;
