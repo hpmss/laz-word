@@ -23,9 +23,6 @@ public class OnCommand implements CommandExecutor{
 		meta.setDisplayName("lwtest");
 		item.setItemMeta(meta);
 		p.getInventory().addItem(item);
-		
-		@SuppressWarnings("unused")
-		Lay lay = new Lay(p);
 	
 		return false;
 	}
