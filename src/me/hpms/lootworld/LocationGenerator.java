@@ -3,10 +3,12 @@ package me.hpms.lootworld;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -33,13 +35,19 @@ public class LocationGenerator {
 	
 	private FileConfiguration pluginConfig;
 	
+	private int currentCounter = 1;
+	
 	private HashMap<String,List<Location>> location;
+	
+	private List<ChestProperty> writeLocation;
 	
 	private LootWorld plugin;
 	
 	private ChestRarity rarity;
 	
 	private final Map<String, Object> worlds;
+	
+	private Set<String> world;
 	
 	private int maxChestPopulation;
 	
@@ -63,11 +71,13 @@ public class LocationGenerator {
 	public LocationGenerator(LootWorld lw) {
 		plugin = lw;
 		location = new HashMap<String,List<Location>>();
+		writeLocation = new ArrayList<ChestProperty>();
 		locationFile = new File(plugin.getDataFolder(), "location.yml");
 		pluginConfig = plugin.getConfig();
 		rarity = plugin.getChestRarity();
 		
 		worlds = pluginConfig.getConfigurationSection("worlds").getValues(false);
+		world = worlds.keySet();
 		
 		positiveBoundary = pluginConfig.getInt("positive-boundary");
 		negativeBoundary = pluginConfig.getInt("negative-boundary");
@@ -82,6 +92,7 @@ public class LocationGenerator {
 		loadConfiguration();
 		readConfiguration();
 		generateLocation();
+		
 		
 	}
 	
@@ -105,8 +116,7 @@ public class LocationGenerator {
 			throw new NullPointerException(PREFIX + "No world found... ?");
 		}
 		locationConfig = YamlConfiguration.loadConfiguration(locationFile);
-		List<String> worldList = new ArrayList<>(worlds.keySet());
-		for(String worldName : worldList) {
+		for(String worldName : world) {
 			location.put(worldName, new ArrayList<Location>());
 			if(locationConfig.getConfigurationSection("location-" + worldName ) == null) {
 				locationConfig.createSection("location-" + worldName);
@@ -125,10 +135,9 @@ public class LocationGenerator {
 	}
 	
 	public void readConfiguration() {
-		List<String> worldList = new ArrayList<>(worlds.keySet());
 		ConfigurationSection section;
 		Map<String,Object> keyValue;
-		World world;
+		World worldz;
 		double x;
 		double y;
 		double z;
@@ -137,7 +146,7 @@ public class LocationGenerator {
 		String[] locationSplit;
 		FixedMetadataValue meta;
 		Location loc;
-		for(String worldName : worldList) {
+		for(String worldName : world) {
 			section = locationConfig.getConfigurationSection("location-" + worldName);
 			keyValue = section.getValues(false);
 			for(java.util.Map.Entry<String, Object> set : keyValue.entrySet()) {
@@ -148,9 +157,9 @@ public class LocationGenerator {
 					x = Double.parseDouble(locationSplit[0]);
 					y = Double.parseDouble(locationSplit[1]);
 					z = Double.parseDouble(locationSplit[2]);
-					world = Bukkit.getWorld(locationSplit[3]);
+					worldz = Bukkit.getWorld(locationSplit[3]);
 					meta = new FixedMetadataValue(plugin,keySplit[0]);
-					loc = new Location(world,x,y,z);
+					loc = new Location(worldz,x,y,z);
 					if(!location.get(worldName).contains(loc)) {
 						loc.getBlock().setMetadata(keySplit[0], meta);
 						location.get(worldName).add(loc);
@@ -162,6 +171,27 @@ public class LocationGenerator {
 			}
 		}
 		
+	}
+	
+	public void saveLocation() {
+		ConfigurationSection section;
+		for(String w : world) {
+			section = locationConfig.getConfigurationSection("location-" + w);
+			if(writeLocation.size() != 0) {
+				Collections.sort(writeLocation);
+				Collections.reverse(writeLocation);
+				currentCounter -= writeLocation.size();
+				for(ChestProperty c : writeLocation) {
+					location.get(w).add(c.getLocation());
+					String loc = c.getLocation().getX() + "," +
+					c.getLocation().getY() + "," + c.getLocation().getZ() + "," + c.getLocation().getWorld().getName();
+					section.set(c.getRarity() + "-" + currentCounter, loc);
+					currentCounter += 1;
+				}
+				
+			}
+			saveConfiguration();
+		}
 	}
 	
 	public Entry<String,Float> generateChestType() {
@@ -183,12 +213,11 @@ public class LocationGenerator {
 	public void generateLocation() {
 		
 		Bukkit.getConsoleSender().sendMessage(PREFIX + "Generating locations for chests...");
-		Bukkit.getConsoleSender().sendMessage(PREFIX + "If this is your first time this may take a while depends on maxChestPopulation");
+		Bukkit.getConsoleSender().sendMessage(PREFIX + "If this is your first time this may take a while depends on max chest population for each world");
 		Bukkit.getConsoleSender().sendMessage(PREFIX + "Consider change spigot.yml \'timeout\' property to higher if your server crash...");
 		
 		double range = (positiveBoundary - negativeBoundary) + 1;
 		World w = null;
-		ConfigurationSection section = null;
 		List<Location> currentWorld = null;
 		double x;
 		double y;
@@ -205,7 +234,6 @@ public class LocationGenerator {
 				currentWorld = location.get(set.getKey());
 				maxChestPopulation = Integer.parseInt(set.getValue().toString());
 				w = Bukkit.getServer().getWorld(set.getKey());
-				section = locationConfig.getConfigurationSection("location-" + set.getKey());
 			}catch(NumberFormatException e) {
 				Bukkit.getConsoleSender().sendMessage(PREFIX + "Cannot parse amount of chest population for world \'" + set.getKey() + "\'");
 				return;
@@ -225,7 +253,7 @@ public class LocationGenerator {
 					Bukkit.getConsoleSender().sendMessage(PREFIX  + "GENERATING CHESTS FOR THE_END MAY TAKES MORE TIME !!!");
 				}
 				Bukkit.getConsoleSender().sendMessage(PREFIX + "Generating chests for world \'" + w.getName() + "\'");
-				int currentCounter = currentWorld.size();
+				currentCounter = currentWorld.size();
 				for(int i = 0; i < maxChestPopulation; i++) {
 					if(currentWorld.size() >= maxChestPopulation) {
 						Bukkit.getConsoleSender().sendMessage(PREFIX + "Chests generation for world " + "\'" + w.getName() + "\' full-filled...");
@@ -291,15 +319,13 @@ public class LocationGenerator {
 						Bukkit.getConsoleSender().sendMessage(PREFIX + " " + currentCounter + " chests generated...");
 					}
 					entry = generateChestType();
-					ChestProperty chest = new ChestProperty(plugin,loc,entry.getKey(),itemAmountAll,itemAmountRank,entry.getValue(),section,String.valueOf(currentCounter));
-					chest.saveChest();
-					location.get(set.getKey()).add(loc);
+					writeLocation.add(new ChestProperty(plugin,loc,entry.getKey(),itemAmountAll,itemAmountRank,entry.getValue()));
 				}
-				
+				saveLocation();
+				writeLocation.clear();
 			}
-			saveConfiguration();
 		}
-		readConfiguration();
+		
 	}
 	
 	

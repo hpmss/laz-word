@@ -39,7 +39,6 @@ public class LootWorld extends JavaPlugin{
 	public void instantiateLootWorld() {
 		if(!(new File(getDataFolder().getPath(),"config.yml").exists())){
 			saveDefaultConfig();
-			saveConfig();
 	    }
 		saveConfig();
 		if(!getDataFolder().exists()) {

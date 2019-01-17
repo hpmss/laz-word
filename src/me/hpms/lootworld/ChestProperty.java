@@ -1,6 +1,5 @@
 package me.hpms.lootworld;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,24 +9,18 @@ import java.util.Map.Entry;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Chest;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
-@SuppressWarnings("serial")
-public class ChestProperty implements Serializable{
+public class ChestProperty implements Comparable<ChestProperty>{
 	
 	private LootWorld plugin;
 	
 	private Location loc;
-
-	private ConfigurationSection section;
 	
 	private Chest chest;
 	
 	private String rarity;
-	
-	private String currentChest;
 	
 	private List<ItemStack> content;
 	
@@ -40,7 +33,7 @@ public class ChestProperty implements Serializable{
 	private FixedMetadataValue metaData;
 
 	
-	public ChestProperty(LootWorld lw,Location loc,String rarity,int itemAmount,int itemAmountRank,float probabilityDistribution,ConfigurationSection section,String currentChest) {
+	public ChestProperty(LootWorld lw,Location loc,String rarity,int itemAmount,int itemAmountRank,float probabilityDistribution) {
 		plugin = lw;
 		this.loc = loc;
 		this.rarity = rarity;
@@ -48,8 +41,6 @@ public class ChestProperty implements Serializable{
 		this.itemAmountRank = itemAmountRank;
 		this.probabilityDistribution = probabilityDistribution;
 		this.metaData = new FixedMetadataValue(plugin,rarity);
-		this.section = section;
-		this.currentChest = currentChest;
 		
 		this.loc.getBlock().setType(Material.CHEST);
 		
@@ -86,10 +77,8 @@ public class ChestProperty implements Serializable{
 		return this.plugin;
 	}
 	
-	public void saveChest() {
-		String locString = loc.getX() + "," + loc.getY() + "," + loc.getZ() + "," + loc.getWorld().getName();
-		section.set(getRarity() + "-" + currentChest, locString);
-		
+	public Location getLocation() {
+		return this.loc;
 	}
 	
 	private List<ItemStack> populateChestItem() {
@@ -147,6 +136,11 @@ public class ChestProperty implements Serializable{
 		
 		return itemList;
 		
+	}
+
+	@Override
+	public int compareTo(ChestProperty o) {
+		return (int) (this.probabilityDistribution - o.getChestDistributionRate());
 	}
 	
 
