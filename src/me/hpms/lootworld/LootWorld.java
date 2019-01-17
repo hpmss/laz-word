@@ -33,14 +33,13 @@ public class LootWorld extends JavaPlugin{
 	
 	@Override
 	public void onDisable() {
-		saveConfig();
+		saveDefaultConfig();
 	}
 	
 	public void instantiateLootWorld() {
 		if(!(new File(getDataFolder().getPath(),"config.yml").exists())){
 			saveDefaultConfig();
 	    }
-		saveConfig();
 		if(!getDataFolder().exists()) {
 			getDataFolder().mkdir();
 		}

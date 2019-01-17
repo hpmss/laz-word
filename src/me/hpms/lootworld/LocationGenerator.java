@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
@@ -67,6 +68,7 @@ public class LocationGenerator {
 	
 	private final int minItemRank;
 	
+	private Random random = new Random();
 	
 	public LocationGenerator(LootWorld lw) {
 		plugin = lw;
@@ -75,6 +77,7 @@ public class LocationGenerator {
 		locationFile = new File(plugin.getDataFolder(), "location.yml");
 		pluginConfig = plugin.getConfig();
 		rarity = plugin.getChestRarity();
+		random.setSeed(random.nextLong());
 		
 		worlds = pluginConfig.getConfigurationSection("worlds").getValues(false);
 		world = worlds.keySet();
@@ -201,9 +204,8 @@ public class LocationGenerator {
 			probability = entry.getValue();
 			t = t + probability;
 			//Uniform distribution ranging from [0,1]	
-			double outcome = Math.random() * rarity.getTotalProbability();
-			
-			if(t >= outcome) {
+			double outcome = random.nextFloat() * rarity.getTotalProbability();
+			if(t > outcome) {
 				return entry;
 			}	
 		}
@@ -262,9 +264,9 @@ public class LocationGenerator {
 					itemAmountRank = (int) (Math.random() * ((maxItemRank - minItemRank) + 1)) + minItemRank;
 					itemAmountAll = (int) (Math.random() * ((maxItemAll - minItemAll ) + 1)) + minItemAll;
 					
-					x = (Math.random() * range) + negativeBoundary;
-					y = (Math.random() * ((maxHeight - minHeight) + 1)) + minHeight;
-				    z = (Math.random() * range) + negativeBoundary;
+					x = (random.nextFloat() * range) + negativeBoundary;
+					y = (random.nextFloat() * ((maxHeight - minHeight) + 1)) + minHeight;
+				    z = (random.nextFloat() * range) + negativeBoundary;
 					if(w.getEnvironment() == Environment.THE_END) {
 						if(currentWorld.size() >= maxChestPopulation) {
 							Bukkit.getConsoleSender().sendMessage(PREFIX + "Chests generation for world " + "\'" + w.getName() + "\' full-filled...");
@@ -282,11 +284,11 @@ public class LocationGenerator {
 									}								
 								}
 							}
-							newX = (Math.random() * range) + negativeBoundary;
+							newX = (random.nextFloat() * range) + negativeBoundary;
 							x = newX;
-							newY = (Math.random() * maxHeight) + 1;
+							newY = (random.nextFloat() * maxHeight) + 1;
 							y = newY;
-							newZ = (Math.random() * range) + negativeBoundary;
+							newZ = (random.nextFloat() * range) + negativeBoundary;
 							z = newZ;
 						}
 					}else {
@@ -300,20 +302,20 @@ public class LocationGenerator {
 											&& loc.add(0,0,1).getBlock().getType() != Material.AIR && loc.add(0,0,1).getBlock().getType() != Material.WATER) {
 										break;
 									}else {
-										newZ = (Math.random() * range) + negativeBoundary;
+										newZ = (random.nextFloat() * range) + negativeBoundary;
 										z = newZ;
 									}
 								}else {
-									newX = (Math.random() * range) + negativeBoundary;
+									newX = (random.nextFloat() * range) + negativeBoundary;
 									x = newX;
 								}	
 							}else {
-								newY = (Math.random() * maxHeight) + 1;
+								newY = (random.nextFloat() * maxHeight) + 1;
 								y = newY;
 							}
 						}
 					}
-					loc = new Location(w,x,y,z);
+					loc = new Location(w,(double)(int)x,(double)(int)y,(double)(int)z);
 					currentCounter += 1;
 					if(currentCounter % 100 == 0) {
 						Bukkit.getConsoleSender().sendMessage(PREFIX + " " + currentCounter + " chests generated...");
