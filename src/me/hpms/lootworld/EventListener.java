@@ -87,38 +87,45 @@ public class EventListener implements Listener {
 					BukkitScheduler scheduler = plugin.getServer().getScheduler();
 			        scheduler.scheduleSyncRepeatingTask(plugin, new Runnable() {
 						float r = 3;
-						double phi = 0F;
+						double theta = 0F;
+						double vel = 1.2;
 			            @Override
 			            public void run() {
-			            	phi += Math.PI / 16;
-			            	for(double theta = 0;theta <= 2 *Math.PI ; theta += Math.PI / 16) {
-			            		double x = r * Math.cos(theta) * Math.sin(phi);
-				            	double y = r * Math.sin(theta) * Math.sin(phi);
-				            	double z = r * Math.cos(phi);
-				             	Location sphere = new Location(loc.getWorld(),loc.getX() + x + 0.5,loc.getY() + z + 0.5 ,loc.getZ() + 0.5 +y);
-				            	inv.getLocation().getWorld().spawnParticle(Particle.CLOUD,
-				            			sphere.getX(),sphere.getY(),sphere.getZ(),2,0D,0D,0D,0D);
+			            	theta += Math.PI / 16;
+			            	for(double phi = 0;phi <= Math.PI ; phi += Math.PI / 16) {
+			            		for(int i = 0; i <= 3 ; i ++) {
+			            			double x = r * Math.cos(theta + phi) * Math.sin(phi);
+					            	double y = r * Math.sin(theta + phi) * Math.sin(phi);
+					            	double z = r * Math.cos(phi);
+					            	if( i == 1) {
+					            		x = r * Math.cos(theta +phi + Math.PI / 2) * Math.sin(phi);
+						            	y = r * Math.sin(theta + phi + Math.PI / 2) * Math.sin(phi);
+						            	z = r * Math.cos(phi);
+					            	}
+					            	if( i == 2) {
+					            		x = r * Math.cos(theta +phi + Math.PI ) * Math.sin(phi);
+						            	y = r * Math.sin(theta + phi +Math.PI) * Math.sin(phi);
+						            	z = r * Math.cos(phi);
+					            	}
+					            	if( i == 3) {
+					            		x = r * Math.cos(theta +phi + Math.PI + Math.PI / 2 ) * Math.sin(phi);
+						            	y = r * Math.sin(theta + phi +Math.PI + Math.PI / 2) * Math.sin(phi);
+						            	z = r * Math.cos(phi);
+					            	}
+					             	Location sphere = new Location(loc.getWorld(),loc.getX() + x + 0.5,loc.getY() + z + 0.5 ,loc.getZ() + 0.5 +y);
+					            	inv.getLocation().getWorld().spawnParticle(Particle.CLOUD,
+					            			sphere.getX(),sphere.getY(),sphere.getZ(),1,0D,0D,0D,0D);
+			            		}
+			            	
 			            	}
 			            	
-			            	if(phi > Math.PI) {
-			            		phi = 0;
+			            	if(theta > 2* Math.PI) {
+			            		theta = 0;
 			            	}
 			           
 			            }
 			        }, 0L, 3);
 					
-//					new BukkitRunnable() {
-//						@SuppressWarnings("deprecation")
-//						@Override
-//						public void run() {
-//							inv.getLocation().getBlock().setType(Material.AIR);
-//							inv.getLocation().getWorld().playEffect(inv.getLocation(),
-//									Effect.CLOUD, 1000, 1000);
-//							inv.getLocation().getWorld().playSound(inv.getLocation(), Sound.ENTITY_PLAYER_LEVELUP
-//									, 5, 5);
-//						}
-//						
-//					}.runTaskTimer(plugin, delay, period);
 					
 				}
 			}
