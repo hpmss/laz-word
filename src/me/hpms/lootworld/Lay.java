@@ -127,6 +127,8 @@ public class Lay {
 		changeFieldValue("a",bed,entityId);
 		changeFieldValue("b",bed, pos);
 		
+		
+		
 		PacketPlayOutEntityTeleport teleport = new PacketPlayOutEntityTeleport();
 		changeFieldValue("a",teleport,entityId);
 		changeFieldValue("b",teleport,MathHelper.floor(((EntityHuman) pc.getHandle()).locX * 32D));
