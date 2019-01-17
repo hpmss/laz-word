@@ -57,7 +57,6 @@ public final class NMSEntity {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-		
 	}
 	
 	/**
@@ -94,11 +93,6 @@ public final class NMSEntity {
 	 * 
 	 * @param w -> casted to CraftWorld call getHandle() which returns WorldServer which extends World
 	 * @param loc -> used to spawn where specified
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
 	 * @castCraftWorld -> return WorldServer for using in a new instance of Custom Entity <T> should be NMS_World
 	 */
 	
@@ -137,7 +131,7 @@ public final class NMSEntity {
 	 * -----
 	 * Enum for accessing attributes of an entity for manipulating.
 	 * -----
-	 * @getValue() -> @return Object casted to IAttribute for manipulating Entity attributes
+	 * @getValue() -> @return Object casted to AttributeRanged for manipulating Entity attributes
 	 */
 	
 	public enum NMSAttributes {
@@ -169,6 +163,16 @@ public final class NMSEntity {
 		public <T> T getValue() {
 			Object attr = null;
 			attr = getFieldObject(att_map,genericAttributes,genericAttributes);
+			try {
+				attr = (T) attr;
+			}catch(ClassCastException e) {
+				e.printStackTrace();
+			}
+			String[] s = attr.getClass().getName().split("[.]");
+			if(!s[s.length - 1].equals("AttributeRanged")) {
+				System.out.print("<T> must be an instance of AttributeRanged");
+				throw new NullPointerException();
+			}
 			return (T) attr;
 		}
 	}
@@ -177,7 +181,7 @@ public final class NMSEntity {
 	 * -----
 	 * Enum for accessing Entity wearing slots.
 	 * -----
-	 * @getValue() -> @return Entity's slot for manipulating wears <T> should be EnumItemSlot.
+	 * @getValue() -> @return Entity's slot for manipulating wears <T> must be EnumItemSlot.
 	 */
 	public enum NMSEntitySlot {
 		MAIN_HAND("MAINHAND"),
@@ -195,12 +199,24 @@ public final class NMSEntity {
 		
 		@SuppressWarnings("unchecked")
 		public <T> T getValue() {
+			T t = null;
 			Object slot = null;
 			Object[] cons = enumItemSlot.getEnumConstants();
 			for(Object constant : cons) {
 				if(constant.toString().equalsIgnoreCase(enumMap)) {
 					slot = constant;
 				}
+			}
+			try {
+				t = (T) slot;
+			}catch(ClassCastException e) {
+				e.printStackTrace();
+				return null;
+			}
+			String[] s = t.getClass().getName().split("[.]");
+			if(!s[s.length - 1].equals("EnumItemSlot")) {
+				System.out.print("<T> must be an instance of EnumItemSlot");
+				throw new NullPointerException();
 			}
 			return (T) slot;
 		}

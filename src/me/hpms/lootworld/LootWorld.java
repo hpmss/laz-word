@@ -51,8 +51,8 @@ public class LootWorld extends JavaPlugin{
 		nms = new NMSEntity();
 		registerEntities();
 		parser = new ItemParser(path);
-		generator = new LocationGenerator(this);
 		rarity = new ChestRarity(this);
+		generator = new LocationGenerator(this);
 		listener = new EventListener(this);
 		getServer().getPluginManager().registerEvents(listener, this);	
 		

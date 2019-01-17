@@ -1,6 +1,5 @@
 package me.hpms.lootworld;
 
-import org.bukkit.craftbukkit.libs.jline.internal.Log;
 import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
 import org.bukkit.event.entity.EntityShootBowEvent;
 
@@ -8,6 +7,7 @@ import net.minecraft.server.v1_12_R1.Blocks;
 import net.minecraft.server.v1_12_R1.DifficultyDamageScaler;
 import net.minecraft.server.v1_12_R1.EntityArrow;
 import net.minecraft.server.v1_12_R1.EntityCreeper;
+import net.minecraft.server.v1_12_R1.EntityHuman;
 import net.minecraft.server.v1_12_R1.EntityLiving;
 import net.minecraft.server.v1_12_R1.EntitySkeleton;
 import net.minecraft.server.v1_12_R1.EntityTippedArrow;
@@ -18,13 +18,18 @@ import net.minecraft.server.v1_12_R1.ItemStack;
 import net.minecraft.server.v1_12_R1.Items;
 import net.minecraft.server.v1_12_R1.MathHelper;
 import net.minecraft.server.v1_12_R1.PathfinderGoalArrowAttack;
+import net.minecraft.server.v1_12_R1.PathfinderGoalHurtByTarget;
+import net.minecraft.server.v1_12_R1.PathfinderGoalLookAtPlayer;
+import net.minecraft.server.v1_12_R1.PathfinderGoalMoveTowardsRestriction;
 import net.minecraft.server.v1_12_R1.PathfinderGoalNearestAttackableTarget;
+import net.minecraft.server.v1_12_R1.PathfinderGoalRandomLookaround;
+import net.minecraft.server.v1_12_R1.PathfinderGoalRandomStrollLand;
 import net.minecraft.server.v1_12_R1.SoundEffects;
 import net.minecraft.server.v1_12_R1.World;
 
 public class CustomEntityMob extends EntityZombie implements IRangedEntity{
 	
-	//Test class for NMSEntity
+	//Reference class
 	
 	public CustomEntityMob(World world) {
 		super(world);
@@ -32,10 +37,16 @@ public class CustomEntityMob extends EntityZombie implements IRangedEntity{
 	
 	@Override
 	protected void r() {
-		super.r();
-		this.goalSelector.a(2,new PathfinderGoalArrowAttack(this,1.0,12,20));
+		
+		this.goalSelector.a(5, new PathfinderGoalMoveTowardsRestriction(this, 1.0D));
+		this.goalSelector.a(7, new PathfinderGoalRandomStrollLand(this, 1.0D));
+		this.goalSelector.a(8, new PathfinderGoalLookAtPlayer(this, EntityHuman.class, 8.0F));
+		this.goalSelector.a(8, new PathfinderGoalRandomLookaround(this));
+		this.goalSelector.a(1,new PathfinderGoalArrowAttack(this,1.0,12,20));
+		this.targetSelector.a(1, new PathfinderGoalHurtByTarget(this, true, new Class[0]));
 		this.targetSelector.a(3,new PathfinderGoalNearestAttackableTarget<>(this,EntityCreeper.class,true));
 		this.targetSelector.a(3, new PathfinderGoalNearestAttackableTarget<>(this,EntitySkeleton.class,true));
+		
 	}
 	
 	
@@ -59,9 +70,9 @@ public class CustomEntityMob extends EntityZombie implements IRangedEntity{
 	    this.a(SoundEffects.fV, 1.0f, 1.0f / (this.getRandom().nextFloat() * 0.4f + 0.8f));
 	}
 
-	protected EntityArrow prepareProjectile(final float unknown) {
+	protected EntityArrow prepareProjectile(final float armorPiercingLevel) {
 	    final EntityArrow arrow = new EntityTippedArrow(this.world, this);
-	    arrow.a(this, unknown);
+	    arrow.a(this, armorPiercingLevel);
 	    return arrow;
 	}
 	
@@ -77,7 +88,6 @@ public class CustomEntityMob extends EntityZombie implements IRangedEntity{
 	protected void initAttributes() {
 		super.initAttributes();
 		this.getAttributeInstance(NMSEntity.NMSAttributes.MAX_HEALTH.getValue()).setValue(1000.0);
-		Log.info(this.getAttributeInstance(NMSEntity.NMSAttributes.MAX_HEALTH.getValue()).getValue());
 		this.getAttributeInstance(NMSEntity.NMSAttributes.ARMOR.getValue()).setValue(5.0);
 	}
 	
