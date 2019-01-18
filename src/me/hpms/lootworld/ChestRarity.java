@@ -43,17 +43,6 @@ public class ChestRarity {
 		return this.totalProbability;
 	}
 	
-	public float getProbability(String rankName) {
-		if(rank.containsKey(rankName)) {
-			float prob = rank.get(rankName);
-			return prob;
-		}else {
-			Bukkit.getConsoleSender().sendMessage(PREFIX + "Cannot parse probability for rank \'" + rankName + "\'");
-			return -1;
-		}
-		
-	}
-	
 	public <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
         List<Entry<K, V>> list = new ArrayList<>(map.entrySet());
         list.sort(Entry.comparingByValue());
@@ -84,6 +73,15 @@ public class ChestRarity {
 			}	
 		}
 		
+	}
+	
+	public float getProbabilityByName(String name) {
+		float prob;
+		if(!rank.containsKey(name)) {
+			throw new NullPointerException("Rank not found...");
+		}
+		prob = rank.get(name);
+		return prob;
 	}
 	
 }

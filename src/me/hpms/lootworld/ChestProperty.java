@@ -1,6 +1,7 @@
 package me.hpms.lootworld;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -31,9 +32,11 @@ public class ChestProperty implements Comparable<ChestProperty>{
 	private float probabilityDistribution;
 	
 	private FixedMetadataValue metaData;
+	
+	private int id;
 
 	
-	public ChestProperty(LootWorld lw,Location loc,String rarity,int itemAmount,int itemAmountRank,float probabilityDistribution) {
+	public ChestProperty(LootWorld lw,int id,Location loc,String rarity,int itemAmount,int itemAmountRank,float probabilityDistribution) {
 		plugin = lw;
 		this.loc = loc;
 		this.rarity = rarity;
@@ -41,6 +44,7 @@ public class ChestProperty implements Comparable<ChestProperty>{
 		this.itemAmountRank = itemAmountRank;
 		this.probabilityDistribution = probabilityDistribution;
 		this.metaData = new FixedMetadataValue(plugin,rarity);
+		this.id = id;
 		
 		this.loc.getBlock().setType(Material.CHEST);
 		
@@ -49,12 +53,22 @@ public class ChestProperty implements Comparable<ChestProperty>{
 		chest.setMetadata(rarity, metaData);
 		
 		this.content = populateChestItem();
-		
-		
 	}
+	public ChestProperty(LootWorld lw,int id,Location loc,String rarity,float probabilityDistribution) {
+		this.plugin = lw;
+		this.loc = loc;
+		this.rarity = rarity;
+		this.id = id;
+		this.probabilityDistribution = probabilityDistribution;
+	}
+	
 	
 	public Chest getChestBlock() {
 		return chest;
+	}
+	
+	public int getId() {
+		return this.id;
 	}
 	
 	public String getRarity() {
@@ -79,6 +93,14 @@ public class ChestProperty implements Comparable<ChestProperty>{
 	
 	public Location getLocation() {
 		return this.loc;
+	}
+	
+	public void reloadChest() {
+		this.metaData = new FixedMetadataValue(plugin,rarity);
+		this.loc.getBlock().setType(Material.CHEST);
+		this.chest = (Chest) loc.getBlock().getState();
+		chest.setMetadata(rarity, metaData);
+		this.content = Arrays.asList(chest.getInventory().getContents());
 	}
 	
 	private List<ItemStack> populateChestItem() {

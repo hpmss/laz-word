@@ -87,7 +87,7 @@ public class CustomEntityMob extends EntityZombie implements IRangedEntity{
 	@Override
 	protected void initAttributes() {
 		super.initAttributes();
-		this.getAttributeInstance(NMSEntity.NMSAttributes.MAX_HEALTH.getValue()).setValue(1000.0);
+		this.getAttributeInstance(NMSEntity.NMSAttributes.MAX_HEALTH.getValue()).setValue(20.0);
 		this.getAttributeInstance(NMSEntity.NMSAttributes.ARMOR.getValue()).setValue(5.0);
 	}
 	

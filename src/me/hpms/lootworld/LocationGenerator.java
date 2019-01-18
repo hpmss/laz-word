@@ -19,7 +19,6 @@ import org.bukkit.World.Environment;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.metadata.FixedMetadataValue;
 
 import net.md_5.bungee.api.ChatColor;
 
@@ -38,7 +37,7 @@ public class LocationGenerator {
 	
 	private int currentCounter = 1;
 	
-	private HashMap<String,List<Location>> location;
+	private HashMap<String,List<ChestProperty>> location;
 	
 	private List<ChestProperty> writeLocation;
 	
@@ -58,7 +57,7 @@ public class LocationGenerator {
 	
 	private double maxHeight = 256;
 	
-	private double minHeight = 1;
+	private double minHeight = 5;
 	
 	private final int maxItemAll;
 	
@@ -72,7 +71,7 @@ public class LocationGenerator {
 	
 	public LocationGenerator(LootWorld lw) {
 		plugin = lw;
-		location = new HashMap<String,List<Location>>();
+		location = new HashMap<String,List<ChestProperty>>();
 		writeLocation = new ArrayList<ChestProperty>();
 		locationFile = new File(plugin.getDataFolder(), "location.yml");
 		pluginConfig = plugin.getConfig();
@@ -103,8 +102,17 @@ public class LocationGenerator {
 		return locationConfig;
 	}
 	
-	public HashMap<String,List<Location>> getChestLocationList() {
-		return location;
+	public List<Location> getChestLocationList(String world) {
+		if(!location.containsKey(world)) {
+			return null;
+		}
+		List<Location> loc = new ArrayList<Location>();
+		List<ChestProperty> c = location.get(world);
+		for(ChestProperty ce : c) {
+			loc.add(ce.getLocation());
+		}
+		
+		return loc;
 	}
 	
 	public void loadConfiguration() {
@@ -120,7 +128,7 @@ public class LocationGenerator {
 		}
 		locationConfig = YamlConfiguration.loadConfiguration(locationFile);
 		for(String worldName : world) {
-			location.put(worldName, new ArrayList<Location>());
+			location.put(worldName, new ArrayList<ChestProperty>());
 			if(locationConfig.getConfigurationSection("location-" + worldName ) == null) {
 				locationConfig.createSection("location-" + worldName);
 				saveConfiguration();
@@ -147,7 +155,6 @@ public class LocationGenerator {
 		String value;
 		String[] keySplit;
 		String[] locationSplit;
-		FixedMetadataValue meta;
 		Location loc;
 		for(String worldName : world) {
 			section = locationConfig.getConfigurationSection("location-" + worldName);
@@ -161,11 +168,11 @@ public class LocationGenerator {
 					y = Double.parseDouble(locationSplit[1]);
 					z = Double.parseDouble(locationSplit[2]);
 					worldz = Bukkit.getWorld(locationSplit[3]);
-					meta = new FixedMetadataValue(plugin,keySplit[0]);
 					loc = new Location(worldz,x,y,z);
-					if(!location.get(worldName).contains(loc)) {
-						loc.getBlock().setMetadata(keySplit[0], meta);
-						location.get(worldName).add(loc);
+					ChestProperty c = new ChestProperty(plugin,Integer.parseInt(keySplit[1]),loc,keySplit[0],plugin.getChestRarity().getProbabilityByName(keySplit[0]));
+					if(!location.get(worldName).contains(c)) {
+						c.reloadChest();
+						location.get(worldName).add(c);
 					}
 				}catch(NumberFormatException e) {
 					System.out.print(e);
@@ -178,18 +185,21 @@ public class LocationGenerator {
 	
 	public void saveLocation() {
 		ConfigurationSection section;
+		int writer = 1;
 		for(String w : world) {
 			section = locationConfig.getConfigurationSection("location-" + w);
 			if(writeLocation.size() != 0) {
 				Collections.sort(writeLocation);
 				Collections.reverse(writeLocation);
-				currentCounter -= writeLocation.size();
+				if(location.get(w).size() != 0) {
+					writer = location.get(w).get(location.get(w).size() - 1).getId() + 1;
+				}
 				for(ChestProperty c : writeLocation) {
-					location.get(w).add(c.getLocation());
+					location.get(w).add(c);
 					String loc = c.getLocation().getX() + "," +
 					c.getLocation().getY() + "," + c.getLocation().getZ() + "," + c.getLocation().getWorld().getName();
-					section.set(c.getRarity() + "-" + currentCounter, loc);
-					currentCounter += 1;
+					section.set(c.getRarity() + "-" + writer, loc);
+					writer += 1;
 				}
 				
 			}
@@ -220,7 +230,7 @@ public class LocationGenerator {
 		
 		double range = (positiveBoundary - negativeBoundary) + 1;
 		World w = null;
-		List<Location> currentWorld = null;
+		List<ChestProperty> currentWorld = null;
 		double x;
 		double y;
 		double z;
@@ -253,14 +263,18 @@ public class LocationGenerator {
 				if(w.getEnvironment() == Environment.THE_END) {
 					minHeight = 16;
 					Bukkit.getConsoleSender().sendMessage(PREFIX  + "GENERATING CHESTS FOR THE_END MAY TAKES MORE TIME !!!");
+				}else {
+					minHeight = 5;
 				}
 				Bukkit.getConsoleSender().sendMessage(PREFIX + "Generating chests for world \'" + w.getName() + "\'");
-				currentCounter = currentWorld.size();
+				currentCounter = currentWorld.size() + 1;
 				for(int i = 0; i < maxChestPopulation; i++) {
-					if(currentWorld.size() >= maxChestPopulation) {
+					if(currentCounter >= maxChestPopulation) {
+						saveLocation();
+						writeLocation.clear();
 						Bukkit.getConsoleSender().sendMessage(PREFIX + "Chests generation for world " + "\'" + w.getName() + "\' full-filled...");
 						break;
-					}	
+					}
 					itemAmountRank = (int) (Math.random() * ((maxItemRank - minItemRank) + 1)) + minItemRank;
 					itemAmountAll = (int) (Math.random() * ((maxItemAll - minItemAll ) + 1)) + minItemAll;
 					
@@ -268,10 +282,6 @@ public class LocationGenerator {
 					y = (random.nextFloat() * ((maxHeight - minHeight) + 1)) + minHeight;
 				    z = (random.nextFloat() * range) + negativeBoundary;
 					if(w.getEnvironment() == Environment.THE_END) {
-						if(currentWorld.size() >= maxChestPopulation) {
-							Bukkit.getConsoleSender().sendMessage(PREFIX + "Chests generation for world " + "\'" + w.getName() + "\' full-filled...");
-							continue;
-						}
 						while(true) {
 							loc = new Location(w,x,y,z);
 							if(loc.subtract(0, 1, 0).getBlock().getType() != Material.AIR && loc.subtract(0, 1, 0).getBlock().getType() != Material.WATER
@@ -321,10 +331,8 @@ public class LocationGenerator {
 						Bukkit.getConsoleSender().sendMessage(PREFIX + " " + currentCounter + " chests generated...");
 					}
 					entry = generateChestType();
-					writeLocation.add(new ChestProperty(plugin,loc,entry.getKey(),itemAmountAll,itemAmountRank,entry.getValue()));
+					writeLocation.add(new ChestProperty(plugin,currentCounter,loc,entry.getKey(),itemAmountAll,itemAmountRank,entry.getValue()));
 				}
-				saveLocation();
-				writeLocation.clear();
 			}
 		}
 		

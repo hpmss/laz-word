@@ -6,7 +6,9 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.Chest;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,6 +19,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitScheduler;
+
+import com.google.common.collect.HashBiMap;
 
 import net.md_5.bungee.api.ChatColor;
 
@@ -56,17 +60,20 @@ public class EventListener implements Listener {
 		}
 		Player p = e.getPlayer();
 		if(e.getClickedBlock().getType() == Material.CHEST) {
+			ConfigurationSection section = plugin.getGenerator().getFileConfiguration().getConfigurationSection("location-" + p.getWorld().getName());
+			HashBiMap<String,Object> set = HashBiMap.create(section.getValues(false));
 			Chest chest = (Chest) e.getClickedBlock().getState();
 			for(String s : rank) {
 				if(chest.hasMetadata(s)) {
-					p.sendMessage(PREFIX + "Chest loot successfully");
-					List<Location> loc = plugin.getGenerator().getChestLocationList().get(p.getWorld().getName());
-					if(loc.contains(new Location(e.getClickedBlock().getLocation().getWorld(),
-							(double)(int)e.getClickedBlock().getLocation().getX(),
-							(double)(int)e.getClickedBlock().getLocation().getY(),
-							(double)(int)e.getClickedBlock().getLocation().getZ()))) {
+					Object l = chest.getLocation().getX() + "," + chest.getLocation().getY() + "," + chest.getLocation().getZ()+ "," +chest.getLocation().getWorld().getName();
+					if(set.inverse().containsKey(l)) {
+						set.inverse().remove(l);
 						p.sendMessage(PREFIX + "Chest exists in location.yml");
+						p.sendMessage(chest.getMetadata(s).toArray().toString());
+						plugin.getGenerator().getFileConfiguration().createSection("location-" + p.getWorld().getName(), set);
+						plugin.getGenerator().saveConfiguration();
 					}
+						
 //					plugin.getNMSEntity().spawnEntity(e.getClickedBlock().getWorld(), e.getClickedBlock().getLocation());
 				}
 			}
@@ -79,53 +86,40 @@ public class EventListener implements Listener {
 	public void onInventoryCloseEvent(InventoryCloseEvent e) {
 		
 		Inventory inv = e.getInventory();
-		
 		if(inv.getHolder() instanceof Chest) {
 			for(String s : rank) {
-				if(inv.getLocation().getBlock().hasMetadata(s) && isEmpty(inv)) {
+				if(inv.getLocation().getBlock().hasMetadata(s)) {
 					Location loc = inv.getLocation();
+					spaceBuffer(loc);
 					BukkitScheduler scheduler = plugin.getServer().getScheduler();
 			        scheduler.scheduleSyncRepeatingTask(plugin, new Runnable() {
-						float r = 3;
-						double theta = 0F;
-						double vel = 1.2;
+						float r = 1.5f;
+						double phi = 0F;
 			            @Override
 			            public void run() {
-			            	theta += Math.PI / 16;
-			            	for(double phi = 0;phi <= Math.PI ; phi += Math.PI / 16) {
-			            		for(int i = 0; i <= 3 ; i ++) {
-			            			double x = r * Math.cos(theta + phi) * Math.sin(phi);
-					            	double y = r * Math.sin(theta + phi) * Math.sin(phi);
-					            	double z = r * Math.cos(phi);
-					            	if( i == 1) {
-					            		x = r * Math.cos(theta +phi + Math.PI / 2) * Math.sin(phi);
-						            	y = r * Math.sin(theta + phi + Math.PI / 2) * Math.sin(phi);
-						            	z = r * Math.cos(phi);
-					            	}
-					            	if( i == 2) {
-					            		x = r * Math.cos(theta +phi + Math.PI ) * Math.sin(phi);
-						            	y = r * Math.sin(theta + phi +Math.PI) * Math.sin(phi);
-						            	z = r * Math.cos(phi);
-					            	}
-					            	if( i == 3) {
-					            		x = r * Math.cos(theta +phi + Math.PI + Math.PI / 2 ) * Math.sin(phi);
-						            	y = r * Math.sin(theta + phi +Math.PI + Math.PI / 2) * Math.sin(phi);
-						            	z = r * Math.cos(phi);
-					            	}
-					             	Location sphere = new Location(loc.getWorld(),loc.getX() + x + 0.5,loc.getY() + z + 0.5 ,loc.getZ() + 0.5 +y);
-					            	inv.getLocation().getWorld().spawnParticle(Particle.CLOUD,
-					            			sphere.getX(),sphere.getY(),sphere.getZ(),1,0D,0D,0D,0D);
-			            		}
-			            	
+			            	phi += Math.PI / 16;
+			            	for(double theta = 0;theta <= 2 *Math.PI ; theta += Math.PI / 16) {
+			            		double x = r * Math.cos(theta) * Math.sin(phi);
+				            	double y = r * Math.sin(theta) * Math.sin(phi);
+				            	double z = r * Math.cos(phi);
+				             	Location sphere = new Location(loc.getWorld(),loc.getX() + x + 0.5,loc.getY() + z + 0.5 ,loc.getZ() + 0.5 +y);
+				            	loc.getWorld().spawnParticle(Particle.CLOUD,
+				            			sphere.getX(),sphere.getY(),sphere.getZ(),2,0D,0D,0D,0D);
 			            	}
-			            	
-			            	if(theta > 2* Math.PI) {
-			            		theta = 0;
+			            	if(phi > 2*Math.PI) {
+			            		loc.getWorld().playSound(loc, Sound.ENTITY_PLAYER_LEVELUP, 10, 10);
+						        loc.getWorld().spawnParticle(Particle.HEART, loc, 10);
+						        loc.getBlock().setType(Material.AIR);
+						        if(!isEmpty(inv)) {
+						        	for(ItemStack item : inv.getContents()) {
+						        		loc.getWorld().dropItem(loc, item);
+						        	}
+						        }
+			            		scheduler.cancelAllTasks();
 			            	}
 			           
 			            }
 			        }, 0L, 3);
-					
 					
 				}
 			}
@@ -134,12 +128,30 @@ public class EventListener implements Listener {
 	
 	@EventHandler
 	public void onBlockPlaceEvent(BlockPlaceEvent e) {
-		if(e.getItemInHand() instanceof Chest) return;
+		if(e.getItemInHand().getType() != Material.CHEST) return;
 		if(e.getItemInHand().getItemMeta().getDisplayName().equalsIgnoreCase("lwtest")) {
 			e.getBlockPlaced().setMetadata("Common", new FixedMetadataValue(plugin,"Common"));
 		}
 	}
 	
+	public void spaceBuffer(Location loc) {
+		Location pivot = loc.clone();
+		for(double x = pivot.getX() - 2; x <= pivot.getX() + 2; x++ )
+		{
+		  for(double y = pivot.getY() - 1; y < pivot.getY() + 1; y++ )
+		  {
+		      for(double z = pivot.getZ() - 2; z <= pivot.getZ() + 2; z++ )
+		      {
+		    	  if(!(x == pivot.getX() && y == pivot.getY() && z == pivot.getZ()) &&
+		    			  !(x == pivot.getX() && y == pivot.getY() - 1 && z == pivot.getZ()) ) {
+		    		  new Location(pivot.getWorld(),x,y,z).getBlock().setType(Material.AIR);
+		    	  }
+		      }
+		  }
+		}
+		
+		pivot.getWorld().playSound(pivot, Sound.ENTITY_GENERIC_EXPLODE, 5, 5);
+	}
 	
 
 }
