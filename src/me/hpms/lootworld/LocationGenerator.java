@@ -22,9 +22,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import net.md_5.bungee.api.ChatColor;
 
-/* TODO 
- * Update location.yml on chest open
- */
+
 public class LocationGenerator {
 	
 	private final String PREFIX = ChatColor.GREEN + "『 LootWorld 』" + ChatColor.BLUE + "-> ";

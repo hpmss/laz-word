@@ -27,8 +27,8 @@ import net.md_5.bungee.api.ChatColor;
 public class EventListener implements Listener {
 	
 	/* TODO 
-	 * Add effects and check for distance
-	 * 
+	 * Cancel task with separate id
+	 * Stop player from spamming effect and sound
 	 */
 	
 	private final String PREFIX = ChatColor.GREEN + "『 LootWorld 』" + ChatColor.BLUE + "-> ";
@@ -36,6 +36,8 @@ public class EventListener implements Listener {
 	private LootWorld plugin;
 	
 	private List<String> rank;
+	
+	public boolean activated = false;
 	
 	
 	public EventListener(LootWorld lw) {
@@ -80,17 +82,21 @@ public class EventListener implements Listener {
 			
 		}
 	}
-
 	
 	@EventHandler
 	public void onInventoryCloseEvent(InventoryCloseEvent e) {
 		
 		Inventory inv = e.getInventory();
+		
 		if(inv.getHolder() instanceof Chest) {
 			for(String s : rank) {
 				if(inv.getLocation().getBlock().hasMetadata(s)) {
 					Location loc = inv.getLocation();
-					spaceBuffer(loc);
+					if(activated == false) {
+						spaceBuffer(loc);
+					}
+					
+					activated = true;
 					BukkitScheduler scheduler = plugin.getServer().getScheduler();
 			        scheduler.scheduleSyncRepeatingTask(plugin, new Runnable() {
 						float r = 1.5f;
@@ -115,6 +121,7 @@ public class EventListener implements Listener {
 						        		loc.getWorld().dropItem(loc, item);
 						        	}
 						        }
+						        activated = false;
 			            		scheduler.cancelAllTasks();
 			            	}
 			           
