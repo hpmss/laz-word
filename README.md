@@ -4,3 +4,4 @@
 **To-do**  
 > Find a better way for generating chests ( because right now it is really suck and the performance also sucked )  
 > Learn a better randomize algorithm
+> Create custom entities for rare chests
