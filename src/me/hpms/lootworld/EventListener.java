@@ -23,11 +23,6 @@ import net.md_5.bungee.api.ChatColor;
 
 public class EventListener implements Listener {
 	
-	/* TODO 
-	 * Cancel task with separate id
-	 * Stop player from spamming effect and sound
-	 */
-	
 	private final String PREFIX = ChatColor.GREEN + "『 LootWorld 』" + ChatColor.BLUE + "-> ";
 
 	private LootWorld plugin;
