@@ -1,17 +1,13 @@
-#Chỉnh range mà chest có thể spawn được
+
 positive-boundary: 99984
 negative-boundary: -99984
-#Chỉnh lượng vật phẩm rank "all" mà ở chest nào cũng có
 max-rank-all-item: 5
 min-rank-all-item: 2
-#Chỉnh lượng vật phẩm rank "riêng" mà ở mỗi chest có thể có
 max-rank-item: 2
 min-rank-item: 1
-#Spawn chest theo rank dựa trên phần trăm
 rank:
   Common: 50
   Rare: 30
   Mythical: 20
-#Số lượng chest ở mỗi world
 worlds:
   world: 500
