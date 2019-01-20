@@ -2,6 +2,7 @@ package me.hpms.lootworld;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -30,6 +31,8 @@ public class EventListener implements Listener {
 	private List<String> rank;
 	
 	public List<Location> activated;
+	
+	private Random rand = new Random();
 	
 	
 	public EventListener(LootWorld lw) {
@@ -60,7 +63,8 @@ public class EventListener implements Listener {
 				if(chest.hasMetadata(s)) {
 					String l = chest.getLocation().getX() + "," + 
 							   chest.getLocation().getY() + "," + chest.getLocation().getZ()+ "," + chest.getLocation().getWorld().getName();
-					plugin.getGenerator().updateConfigByWorld(p.getWorld().getName(), l, PREFIX + chest.getMetadata(s).toString());
+					plugin.getGenerator().updateConfigByWorld(p.getWorld().getName(), l, PREFIX +
+							ChatColor.RED + p.getName() + ChatColor.GREEN +" đã tìm thấy rương " + ChatColor.GOLD + s + " !");
 				}
 			}
 			
@@ -79,7 +83,14 @@ public class EventListener implements Listener {
 					if(!activated.contains(loc)) {
 						activated.add(loc);
 						spaceBuffer(loc);
-						plugin.getNMSEntity().spawnEntity(loc.getWorld(), loc.clone().add(2, 0, 2));
+						if(rank.size() >= 2) {
+							if(rank.subList(rank.size() - 2, rank.size()).contains(s)) {
+								int a = rand.nextInt(4) + 1;
+								for(int i = 0; i < a;i++) {
+									plugin.getNMSEntity().spawnEntity(loc.getWorld(), loc.clone().add(rand.nextInt(3) , 0, rand.nextInt(3)));
+								}
+							}
+						}	
 						@SuppressWarnings("unused")
 						TaskHandler handler = new TaskHandler(plugin,0,3) {
 							float r = 1.5f;

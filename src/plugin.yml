@@ -1,9 +1,12 @@
 main: me.hpms.lootworld.LootWorld
 name: LootWorld
-author: hpms
+author: GitHub/hpmss
 version: 1.0
 description: nani kode
 commands:
     lwtest:
          Description: Debugging
          usage: /lwtest
+permissions:
+    lootworld.god:
+         default: op

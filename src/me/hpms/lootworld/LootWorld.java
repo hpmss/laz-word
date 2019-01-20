@@ -3,6 +3,7 @@ package me.hpms.lootworld;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -47,10 +48,9 @@ public class LootWorld extends JavaPlugin{
 		}
 		this.getCommand("lwtest").setExecutor(new OnCommand());
 		
-		
+		parser = new ItemParser(path);
 		nms = new NMSEntity();
 		registerEntities();
-		parser = new ItemParser(path);
 		rarity = new ChestRarity(this);
 		generator = new LocationGenerator(this);
 		listener = new EventListener(this);
@@ -79,7 +79,7 @@ public class LootWorld extends JavaPlugin{
 		}
 	}
 	
-	public List<ItemConfig> getParsedItems() {
+	public HashMap<String,ArrayList<ItemConfig>> getParsedItems() {
 		return parser.getParsedItems();
 	}
 	
@@ -87,7 +87,7 @@ public class LootWorld extends JavaPlugin{
 		return parser.getRankAllItems();
 	}
 	
-	public HashMap<Float,ItemStack> getRankAllItemsDistribution() {
+	public HashMap<ItemStack,Float> getRankAllItemsDistribution() {
 		return parser.getRankAllItemsDistribution();
 	}
 	

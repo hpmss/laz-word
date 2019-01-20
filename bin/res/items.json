@@ -38,6 +38,18 @@
 			"unbreaking": 4,
 			"fire_aspect": 2
 		},
-		"rank": "uncommon"
+		"rank": "rare"
+	},
+	"Yui": {
+		"name": "&8&L&KJotaro",
+		"material": "GOLD_PICKAXE",
+		"lore": ["&B&LYui is love.","&B&OYui is life."],
+		"amount": 1,
+		"enchantment": {
+			"efficiency": 10,
+			"unbreaking": 10,
+			"fortune": 10
+		},
+		"rank": "mythical"
 	}
 }

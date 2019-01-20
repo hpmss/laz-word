@@ -91,10 +91,9 @@ public class LocationGenerator {
 		maxItemRank = pluginConfig.getInt("max-rank-item");
 		minItemRank = pluginConfig.getInt("min-rank-item");
 		
-		Bukkit.getConsoleSender().sendMessage(PREFIX + "Reading location.yml...");
 		loadConfiguration();
-		readConfiguration();
 		generateLocation();
+		readConfiguration();
 		
 		
 	}
@@ -157,6 +156,7 @@ public class LocationGenerator {
 	}
 	
 	public void readConfiguration() {
+		Bukkit.getConsoleSender().sendMessage(PREFIX + "Wrapping up...");
 		ConfigurationSection section;
 		Map<String,Object> keyValue;
 		World worldz;
@@ -168,6 +168,9 @@ public class LocationGenerator {
 		for(String worldName : world) {
 			section = locationConfig.getConfigurationSection("location-" + worldName);
 			keyValue = section.getValues(false);
+			if(keyValue.size() == 0||keyValue.size() == location.get(worldName).size()) {
+				break;
+			}
 			for(java.util.Map.Entry<String, Object> set : keyValue.entrySet()) {
 				keySplit = set.getKey().split("-");
 				locationSplit = ((String) set.getValue()).split(",");
@@ -190,27 +193,30 @@ public class LocationGenerator {
 		}
 		
 	}
-	
-	public void saveLocation() {
+	public void saveLocation(String w) {
 		ConfigurationSection section;
 		int writer = 1;
-		for(String w : world) {
-			section = locationConfig.getConfigurationSection("location-" + w);
-			if(writeLocation.size() != 0) {
-				Collections.sort(writeLocation);
-				Collections.reverse(writeLocation);
-				if(location.get(w).size() != 0) {
-					writer = lastId + 1;
-				}
-				for(ChestProperty c : writeLocation) {
-					location.get(w).put(c.toIdString(), c.toString());
-					section.set(c.getRarity() + "-" + writer, c.toString());
-					writer += 1;
-				}
-				
+		section = locationConfig.getConfigurationSection("location-" + w);
+		if(writeLocation.size() != 0) {
+			if(section.getValues(false).size() != 0) {
+				int last = Integer.parseInt((new ArrayList<String>(section.getValues(false).keySet())).
+						get(section.getValues(false).size() - 1).split("-")[1]);
+				writer += last;
 			}
-			saveConfiguration();
+			Collections.sort(writeLocation);
+			Collections.reverse(writeLocation);
+			if(location.get(w).size() != 0) {
+				writer = lastId + 1;
+			}
+			for(ChestProperty c : writeLocation) {
+				location.get(w).put(c.getRarity() + "-" + writer, c.toString());
+				section.set(c.getRarity() + "-" + writer, c.toString());
+				writer += 1;
+			}
+				
 		}
+		saveConfiguration();
+		writeLocation.clear();
 	}
 	
 	public Entry<String,Float> generateChestType() {
@@ -227,12 +233,14 @@ public class LocationGenerator {
 		}
 		return null;
 	}
-
+	
+	private int pseudoRead(String w) {
+		return locationConfig.getConfigurationSection("location-" + w).getValues(false).size();
+	}
+	
 	public void generateLocation() {
-		
-		Bukkit.getConsoleSender().sendMessage(PREFIX + "Generating locations for chests...");
 		Bukkit.getConsoleSender().sendMessage(PREFIX + "If this is your first time this may take a while depends on max chest population for each world");
-		Bukkit.getConsoleSender().sendMessage(PREFIX + "Consider change spigot.yml \'timeout\' property to higher if your server crash...");
+		Bukkit.getConsoleSender().sendMessage(PREFIX + "Consider changing spigot.yml \'timeout\' property to higher if your server crash...");
 		
 		double range = (positiveBoundary - negativeBoundary) + 1;
 		World w = null;
@@ -249,7 +257,7 @@ public class LocationGenerator {
 		Entry<String,Float> entry;
 		for(Entry<String,Object> set : worlds.entrySet()) {
 			try {
-				currentWorld = location.get(set.getKey()).size();
+				currentWorld = pseudoRead(set.getKey()) + 1;
 				maxChestPopulation = Integer.parseInt(set.getValue().toString());
 				w = Bukkit.getServer().getWorld(set.getKey());
 			}catch(NumberFormatException e) {
@@ -273,11 +281,10 @@ public class LocationGenerator {
 					minHeight = 5;
 				}
 				Bukkit.getConsoleSender().sendMessage(PREFIX + "Generating chests for world \'" + w.getName() + "\'");
-				currentCounter = currentWorld + 1;
+				currentCounter = currentWorld;
 				for(int i = 0; i < maxChestPopulation; i++) {
 					if(currentCounter >= maxChestPopulation) {
-						saveLocation();
-						writeLocation.clear();
+						saveLocation(set.getKey());
 						Bukkit.getConsoleSender().sendMessage(PREFIX + "Chests generation for world " + "\'" + w.getName() + "\' full-filled...");
 						break;
 					}

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -39,12 +40,13 @@ public class ItemParser {
 	
 	private String rank = "all";
 	
-	private ArrayList<ItemConfig> items = new ArrayList<ItemConfig>();
+	private HashMap<String,ArrayList<ItemConfig>> items = new HashMap<String,ArrayList<ItemConfig>>();
 	
 	private ArrayList<ItemStack> rankAllItems = new ArrayList<ItemStack>();
 	
 	private int rankAllCounter = 0;
 	
+	private HashMap<ItemStack,Float> itemsMap;
 	
 	private File getDataFolder;
 	
@@ -57,9 +59,17 @@ public class ItemParser {
 			e.printStackTrace();
 		}
 		parseCustomItem(getDataFolder);
+		itemsMap = new HashMap<ItemStack,Float>();
+		if(rankAllCounter != 0) {
+			float prob = 1.0f / (float)rankAllCounter;
+			
+			for(ItemStack item : rankAllItems) {
+				itemsMap.put(item, prob);
+			}
+		}
 	}
 	
-	public List<ItemConfig> getParsedItems() {
+	public HashMap<String,ArrayList<ItemConfig>> getParsedItems() {
 		return this.items;
 	}
 	
@@ -67,16 +77,8 @@ public class ItemParser {
 		return this.rankAllItems;
 	}
 	
-	public HashMap<Float,ItemStack> getRankAllItemsDistribution() {
-		HashMap<Float,ItemStack> items = new HashMap<Float,ItemStack>();
-		if(rankAllCounter != 0) {
-			float prob = 1.0f / (float)rankAllCounter;
-			
-			for(ItemStack item : rankAllItems) {
-				items.put(prob, item);
-			}
-		}
-		return items;
+	public HashMap<ItemStack,Float> getRankAllItemsDistribution() {
+		return itemsMap;
 	}
 	
 	//Class Methods
@@ -103,7 +105,7 @@ public class ItemParser {
 							case "amount": this.amount = Integer.parseInt(itemValue.toString());break;
 							case "lore": this.lore = convertColor((List<String>) itemValue);break;
 							case "enchantment": this.stringEnchantment = itemValue.toString();this.enchantment = convertStringToHashMap(stringEnchantment);break;
-							case "rank": this.rank = itemValue.toString();break;
+							case "rank": this.rank = StringUtils.capitalize(itemValue.toString());break;
 							}
 						}catch(NumberFormatException e) {
 							Bukkit.getConsoleSender().sendMessage(PREFIX + "either \'amount\' have incorrect format...");
@@ -123,7 +125,10 @@ public class ItemParser {
 						rankAllItems.add(item.getItem());
 						rankAllCounter +=  1;
 					}else {
-						items.add(item);
+						if(!items.containsKey(item.getRank())) {
+							items.put(item.getRank(), new ArrayList<ItemConfig>());
+						}
+						items.get(item.getRank()).add(item);
 					}
 					
 					
@@ -183,7 +188,7 @@ public class ItemParser {
 		BufferedWriter writer = null;
 		
 		if(fileEnchantment.exists()) {
-			Bukkit.getConsoleSender().sendMessage( PREFIX + "enchantment.json already existed...");
+			return;
 		}else {
 			try {
 				fileEnchantment.createNewFile();
@@ -201,7 +206,6 @@ public class ItemParser {
 			}
 		}
 		if(fileItem.exists()) {
-			Bukkit.getConsoleSender().sendMessage(PREFIX + "items.json already existed...");
 			return;
 		}else {
 			try {

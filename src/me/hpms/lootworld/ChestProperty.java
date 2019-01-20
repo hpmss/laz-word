@@ -2,11 +2,12 @@ package me.hpms.lootworld;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Chest;
@@ -14,6 +15,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
 public class ChestProperty implements Comparable<ChestProperty>{
+	
+	private final String PREFIX = ChatColor.GREEN + "『 LootWorld 』" + ChatColor.BLUE + "-> ";
 	
 	private LootWorld plugin;
 	
@@ -87,10 +90,6 @@ public class ChestProperty implements Comparable<ChestProperty>{
 		return metaData;
 	}
 	
-	public LootWorld getPlugin() {
-		return this.plugin;
-	}
-	
 	public Location getLocation() {
 		return this.loc;
 	}
@@ -112,51 +111,46 @@ public class ChestProperty implements Comparable<ChestProperty>{
 		this.content = Arrays.asList(chest.getInventory().getContents());
 	}
 	
-	private List<ItemStack> populateChestItem() {
+	private ArrayList<ItemStack> populateChestItem() {
 		
-		List<ItemStack> itemList = new ArrayList<ItemStack>();
-		
-		List<ItemStack> rankItem = new ArrayList<ItemStack>();
-		
-		
-		
-		for(ItemConfig item : plugin.getParsedItems()) {
-			if(item.getRank().equalsIgnoreCase(this.rarity)) {
-				rankItem.add(item.getItem());
-			}
-		}
+		ArrayList<ItemStack> itemList = new ArrayList<ItemStack>();
+		ArrayList<ItemConfig> rankItem = plugin.getParsedItems().get(rarity);		
 		
 		float probabilityRank = 1f;
-		if(rankItem.size() != 0) {
-			probabilityRank = probabilityRank / (float)rankItem.size();
+		try {
+			if(rankItem.size() != 0) {
+				probabilityRank = probabilityRank / (float)rankItem.size();
+			}
+		}catch(NullPointerException e) {
+			Bukkit.getConsoleSender().sendMessage(PREFIX + "Unknown rank: " + ChatColor.RED + rarity);
+			Bukkit.getConsoleSender().sendMessage(PREFIX + "Does item with rank " + ChatColor.RED + rarity + ChatColor.BLUE + " exists in items.json ?");
 		}
-		
 		
 		
 		for(int i = 0; i < itemAmount; i ++) {
 			double t = 0;
-			Collections.shuffle(plugin.getRankAllItems());
-			for(Entry<Float, ItemStack> item : plugin.getRankAllItemsDistribution().entrySet()) {
-				t += item.getKey();
+			for(Entry<ItemStack, Float> item : plugin.getRankAllItemsDistribution().entrySet()) {
+				t += item.getValue();
 				double outcome = Math.random();
 				if(t >= outcome) {
-					itemList.add(item.getValue());
+					itemList.add(item.getKey());
 				}
 			}
 		}
 		
+		HashMap<ItemStack,Float> mapRankItem = new HashMap<ItemStack,Float>();
+		for(ItemConfig item : rankItem) {
+			mapRankItem.put(item.getItem(),probabilityRank);
+		}
+		
 		for(int i = 0; i < itemAmountRank ; i ++) {
 			double t = 0;
-			HashMap<Float,ItemStack> mapRankItem = new HashMap<Float,ItemStack>();
-			Collections.shuffle(rankItem);
-			for(ItemStack item : rankItem) {
-				mapRankItem.put(probabilityRank, item);
-			}
-			for(Entry<Float,ItemStack> item : mapRankItem.entrySet()) {
-				t += item.getKey();
+			
+			for(Entry<ItemStack,Float> item : mapRankItem.entrySet()) {
+				t += item.getValue();
 				double outcome = Math.random();
 				if(t >= outcome) {			
-					itemList.add(item.getValue());
+					itemList.add(item.getKey());
 				}
 			}
 		}

@@ -19,12 +19,14 @@ public class OnCommand implements CommandExecutor{
 			return false;
 		}
 		Player p = (Player) sender;
+		if(p.hasPermission("lootworld.god")) {
+			ItemStack item = new ItemStack(Material.CHEST);
+			ItemMeta meta = item.getItemMeta();
+			meta.setDisplayName(ChatColor.RED + "lwtest");
+			item.setItemMeta(meta);
+			p.getInventory().addItem(item);
+		}
 		
-		ItemStack item = new ItemStack(Material.CHEST);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(ChatColor.RED + "lwtest");
-		item.setItemMeta(meta);
-		p.getInventory().addItem(item);
 	
 		return false;
 	}
