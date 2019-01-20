@@ -1,13 +1,13 @@
 max-chest-population: 1000
 positive-boundary: 99984
 negative-boundary: -99984
-max-rank-all-item: 5
-min-rank-all-item: 2
-max-rank-item: 2
-min-rank-item: 0
+max-rank-all-item: 10
+min-rank-all-item: 3
+max-rank-item: 4
+min-rank-item: 1
 rank:
   Common: 50
-  Rare: 25
+  Rare: 30
   Mythical: 20
 worlds:
   world: 500

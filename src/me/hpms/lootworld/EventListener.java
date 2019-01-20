@@ -8,7 +8,6 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Chest;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,8 +17,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
-
-import com.google.common.collect.HashBiMap;
 
 import me.hpms.lootworld.util.TaskHandler;
 import net.md_5.bungee.api.ChatColor;
@@ -37,12 +34,13 @@ public class EventListener implements Listener {
 	
 	private List<String> rank;
 	
-	public boolean activated = false;
+	public List<Location> activated;
 	
 	
 	public EventListener(LootWorld lw) {
 		plugin = lw;
 		rank = new ArrayList<>(plugin.getChestRarity().getRanking().keySet());
+		activated = new ArrayList<Location>();
 		
 	}
 	
@@ -62,21 +60,12 @@ public class EventListener implements Listener {
 		}
 		Player p = e.getPlayer();
 		if(e.getClickedBlock().getType() == Material.CHEST) {
-			ConfigurationSection section = plugin.getGenerator().getFileConfiguration().getConfigurationSection("location-" + p.getWorld().getName());
-			HashBiMap<String,Object> set = HashBiMap.create(section.getValues(false));
 			Chest chest = (Chest) e.getClickedBlock().getState();
 			for(String s : rank) {
 				if(chest.hasMetadata(s)) {
-					Object l = chest.getLocation().getX() + "," + chest.getLocation().getY() + "," + chest.getLocation().getZ()+ "," +chest.getLocation().getWorld().getName();
-					if(set.inverse().containsKey(l)) {
-						set.inverse().remove(l);
-						p.sendMessage(PREFIX + "Chest exists in location.yml");
-						p.sendMessage(chest.getMetadata(s).toArray().toString());
-						plugin.getGenerator().getFileConfiguration().createSection("location-" + p.getWorld().getName(), set);
-						plugin.getGenerator().saveConfiguration();
-					}
-						
-//					plugin.getNMSEntity().spawnEntity(e.getClickedBlock().getWorld(), e.getClickedBlock().getLocation());
+					String l = chest.getLocation().getX() + "," + 
+							   chest.getLocation().getY() + "," + chest.getLocation().getZ()+ "," + chest.getLocation().getWorld().getName();
+					plugin.getGenerator().updateConfigByWorld(p.getWorld().getName(), l, PREFIX + chest.getMetadata(s).toString());
 				}
 			}
 			
@@ -92,39 +81,42 @@ public class EventListener implements Listener {
 			for(String s : rank) {
 				if(inv.getLocation().getBlock().hasMetadata(s)) {
 					Location loc = inv.getLocation();
-					if(activated == false) {
+					if(!activated.contains(loc)) {
+						activated.add(loc);
 						spaceBuffer(loc);
-						activated = true;
+						plugin.getNMSEntity().spawnEntity(loc.getWorld(), loc.clone().add(2, 0, 2));
+						@SuppressWarnings("unused")
+						TaskHandler handler = new TaskHandler(plugin,0,3) {
+							float r = 1.5f;
+							double phi = 0F;
+				            @Override
+				            public void run() {
+				            	phi += Math.PI / 16;
+				            	for(double theta = 0;theta <= 2 *Math.PI ; theta += Math.PI / 16) {
+				            		double x = r * Math.cos(theta) * Math.sin(phi);
+					            	double y = r * Math.sin(theta) * Math.sin(phi);
+					            	double z = r * Math.cos(phi);
+					             	Location sphere = new Location(loc.getWorld(),loc.getX() + x + 0.5,loc.getY() + z + 0.5 ,loc.getZ() + 0.5 +y);
+					            	loc.getWorld().spawnParticle(Particle.CLOUD,
+					            			sphere.getX(),sphere.getY(),sphere.getZ(),2,0D,0D,0D,0D);
+				            	}
+				            	if(phi > 2*Math.PI) {
+				            		loc.getWorld().playSound(loc, Sound.ENTITY_PLAYER_LEVELUP, 10, 10);
+							        loc.getWorld().spawnParticle(Particle.HEART, loc, 10);
+							        loc.getBlock().setType(Material.AIR);
+							        if(!isEmpty(inv)) {
+							        	for(ItemStack item : inv.getContents()) {
+							        		loc.getWorld().dropItem(loc, item);
+							        	}
+							        }
+							        activated.remove(loc);
+				            		cancelTask();
+				            	}
+				           
+				            }
+				        };
 					}
-					new TaskHandler(plugin,0,3) {
-						float r = 1.5f;
-						double phi = 0F;
-			            @Override
-			            public void run() {
-			            	phi += Math.PI / 16;
-			            	for(double theta = 0;theta <= 2 *Math.PI ; theta += Math.PI / 16) {
-			            		double x = r * Math.cos(theta) * Math.sin(phi);
-				            	double y = r * Math.sin(theta) * Math.sin(phi);
-				            	double z = r * Math.cos(phi);
-				             	Location sphere = new Location(loc.getWorld(),loc.getX() + x + 0.5,loc.getY() + z + 0.5 ,loc.getZ() + 0.5 +y);
-				            	loc.getWorld().spawnParticle(Particle.CLOUD,
-				            			sphere.getX(),sphere.getY(),sphere.getZ(),2,0D,0D,0D,0D);
-			            	}
-			            	if(phi > 2*Math.PI) {
-			            		loc.getWorld().playSound(loc, Sound.ENTITY_PLAYER_LEVELUP, 10, 10);
-						        loc.getWorld().spawnParticle(Particle.HEART, loc, 10);
-						        loc.getBlock().setType(Material.AIR);
-						        if(!isEmpty(inv)) {
-						        	for(ItemStack item : inv.getContents()) {
-						        		loc.getWorld().dropItem(loc, item);
-						        	}
-						        }
-						        activated = false;
-			            		cancelTask();
-			            	}
-			           
-			            }
-			        };
+					
 					
 				}
 			}
@@ -134,7 +126,7 @@ public class EventListener implements Listener {
 	@EventHandler
 	public void onBlockPlaceEvent(BlockPlaceEvent e) {
 		if(e.getItemInHand().getType() != Material.CHEST) return;
-		if(e.getItemInHand().getItemMeta().getDisplayName().equalsIgnoreCase("lwtest")) {
+		if(e.getItemInHand().getItemMeta().getDisplayName().equalsIgnoreCase(ChatColor.RED + "lwtest")) {
 			e.getBlockPlaced().setMetadata("Common", new FixedMetadataValue(plugin,"Common"));
 		}
 	}
@@ -143,7 +135,7 @@ public class EventListener implements Listener {
 		Location pivot = loc.clone();
 		for(double x = pivot.getX() - 2; x <= pivot.getX() + 2; x++ )
 		{
-		  for(double y = pivot.getY() - 1; y < pivot.getY() + 1; y++ )
+		  for(double y = pivot.getY() - 1; y <= pivot.getY() + 1; y++ )
 		  {
 		      for(double z = pivot.getZ() - 2; z <= pivot.getZ() + 2; z++ )
 		      {

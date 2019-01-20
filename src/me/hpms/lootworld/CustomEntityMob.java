@@ -3,6 +3,7 @@ package me.hpms.lootworld;
 import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
 import org.bukkit.event.entity.EntityShootBowEvent;
 
+import me.hpms.lootworld.util.NMSEntity;
 import net.minecraft.server.v1_12_R1.Blocks;
 import net.minecraft.server.v1_12_R1.DifficultyDamageScaler;
 import net.minecraft.server.v1_12_R1.EntityArrow;
@@ -37,7 +38,6 @@ public class CustomEntityMob extends EntityZombie implements IRangedEntity{
 	
 	@Override
 	protected void r() {
-		
 		this.goalSelector.a(5, new PathfinderGoalMoveTowardsRestriction(this, 1.0D));
 		this.goalSelector.a(7, new PathfinderGoalRandomStrollLand(this, 1.0D));
 		this.goalSelector.a(8, new PathfinderGoalLookAtPlayer(this, EntityHuman.class, 8.0F));

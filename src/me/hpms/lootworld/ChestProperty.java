@@ -95,6 +95,10 @@ public class ChestProperty implements Comparable<ChestProperty>{
 		return this.loc;
 	}
 	
+	public String toIdString() {
+		return rarity + "-" + id;
+	}
+	
 	@Override
 	public String toString() {
 		String s = loc.getX() + "," + loc.getY() + "," + loc.getZ() + "," + loc.getWorld().getName();
@@ -103,7 +107,6 @@ public class ChestProperty implements Comparable<ChestProperty>{
 	
 	public void reloadChest() {
 		this.metaData = new FixedMetadataValue(plugin,rarity);
-		this.loc.getBlock().setType(Material.CHEST);
 		this.chest = (Chest) loc.getBlock().getState();
 		chest.setMetadata(rarity, metaData);
 		this.content = Arrays.asList(chest.getInventory().getContents());

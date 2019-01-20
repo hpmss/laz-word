@@ -8,6 +8,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import net.md_5.bungee.api.ChatColor;
+
 public class OnCommand implements CommandExecutor{
 	
 	@Override
@@ -20,7 +22,7 @@ public class OnCommand implements CommandExecutor{
 		
 		ItemStack item = new ItemStack(Material.CHEST);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName("lwtest");
+		meta.setDisplayName(ChatColor.RED + "lwtest");
 		item.setItemMeta(meta);
 		p.getInventory().addItem(item);
 	

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,7 +36,9 @@ public class LocationGenerator {
 	
 	private int currentCounter = 1;
 	
-	private HashMap<String,List<ChestProperty>> location;
+	private HashMap<String,LinkedHashMap<String,String>> location;
+	
+	private int lastId;
 	
 	private List<ChestProperty> writeLocation;
 	
@@ -69,7 +72,7 @@ public class LocationGenerator {
 	
 	public LocationGenerator(LootWorld lw) {
 		plugin = lw;
-		location = new HashMap<String,List<ChestProperty>>();
+		location = new HashMap<String,LinkedHashMap<String,String>>();
 		writeLocation = new ArrayList<ChestProperty>();
 		locationFile = new File(plugin.getDataFolder(), "location.yml");
 		pluginConfig = plugin.getConfig();
@@ -100,30 +103,29 @@ public class LocationGenerator {
 		return locationConfig;
 	}
 	
-//	public BiMap<String,String> updateMapByWorld(String world,String loc) {
-//		BiMap<String,String> map = HashBiMap.create();
-//		if(!(location.containsKey(world))) {
-//			return null;
-//		}
-//		List<ChestProperty> list = location.get(world);
-//		Collections.reverse(list);
-//		for(ChestProperty c : list) {
-//			String value = c.toString();
-//			String key = c.getRarity() + "-" + c.getId();
-//			map.put(key, value);
-//		}
-//		if(!(map.inverse().containsKey(loc))) return null;
-//		map.inverse().remove(loc);
-//		locationConfig.createSection("location-" + world,map);
-//		String[] splitLoc = loc.split(",");
-//		Location l = new Location(Bukkit.getWorld(world),Double.parseDouble(splitLoc[0]),Double.parseDouble(splitLoc[1]),Double.parseDouble(splitLoc[2]));
-//		for(ChestProperty c : list) {
-//			
-//		}
-//		
-//		return map;
-//	}
-//	
+	public void updateConfigByWorld(String world,String loc,String... message) {
+		if(!location.containsKey(world)) return;
+		boolean found = false;
+		for(Entry<String,String> entry : location.get(world).entrySet()) {
+			if(!entry.getValue().equalsIgnoreCase(loc)) {
+				continue;
+			}else {
+				location.get(world).remove(entry.getKey());
+				found = true;
+				break;
+			}
+		}
+		if(message.length != 0 && found == true) {
+			locationConfig.createSection("location-" + world , location.get(world));
+			found = false;
+			for(String m : message) {
+				Bukkit.getServer().broadcastMessage(m);
+			}
+		}
+		saveConfiguration();
+		
+	}
+	
 	public void loadConfiguration() {
 		if(!locationFile.exists()) {
 			try {
@@ -137,7 +139,7 @@ public class LocationGenerator {
 		}
 		locationConfig = YamlConfiguration.loadConfiguration(locationFile);
 		for(String worldName : world) {
-			location.put(worldName, new ArrayList<ChestProperty>());
+			location.put(worldName, new LinkedHashMap<String,String>());
 			if(locationConfig.getConfigurationSection("location-" + worldName ) == null) {
 				locationConfig.createSection("location-" + worldName);
 				saveConfiguration();
@@ -161,27 +163,24 @@ public class LocationGenerator {
 		double x;
 		double y;
 		double z;
-		String value;
 		String[] keySplit;
 		String[] locationSplit;
-		Location loc;
 		for(String worldName : world) {
 			section = locationConfig.getConfigurationSection("location-" + worldName);
 			keyValue = section.getValues(false);
 			for(java.util.Map.Entry<String, Object> set : keyValue.entrySet()) {
-				value = (String) set.getValue();
 				keySplit = set.getKey().split("-");
-				locationSplit = value.split(",");
+				locationSplit = ((String) set.getValue()).split(",");
 				try {
 					x = Double.parseDouble(locationSplit[0]);
 					y = Double.parseDouble(locationSplit[1]);
 					z = Double.parseDouble(locationSplit[2]);
 					worldz = Bukkit.getWorld(locationSplit[3]);
-					loc = new Location(worldz,x,y,z);
-					ChestProperty c = new ChestProperty(plugin,Integer.parseInt(keySplit[1]),loc,keySplit[0],plugin.getChestRarity().getProbabilityByName(keySplit[0]));
-					if(!location.get(worldName).contains(c)) {
+					ChestProperty c = new ChestProperty(plugin,Integer.parseInt(keySplit[1]),new Location(worldz,x,y,z),keySplit[0],plugin.getChestRarity().getProbabilityByName(keySplit[0]));
+					if(!location.get(worldName).containsKey(c.toIdString())) {
 						c.reloadChest();
-						location.get(worldName).add(c);
+						lastId = c.getId();
+						location.get(worldName).put(c.toIdString(), c.toString());
 					}
 				}catch(NumberFormatException e) {
 					System.out.print(e);
@@ -201,10 +200,10 @@ public class LocationGenerator {
 				Collections.sort(writeLocation);
 				Collections.reverse(writeLocation);
 				if(location.get(w).size() != 0) {
-					writer = location.get(w).get(location.get(w).size() - 1).getId() + 1;
+					writer = lastId + 1;
 				}
 				for(ChestProperty c : writeLocation) {
-					location.get(w).add(c);
+					location.get(w).put(c.toIdString(), c.toString());
 					section.set(c.getRarity() + "-" + writer, c.toString());
 					writer += 1;
 				}
@@ -237,7 +236,7 @@ public class LocationGenerator {
 		
 		double range = (positiveBoundary - negativeBoundary) + 1;
 		World w = null;
-		List<ChestProperty> currentWorld = null;
+		int currentWorld;
 		double x;
 		double y;
 		double z;
@@ -250,7 +249,7 @@ public class LocationGenerator {
 		Entry<String,Float> entry;
 		for(Entry<String,Object> set : worlds.entrySet()) {
 			try {
-				currentWorld = location.get(set.getKey());
+				currentWorld = location.get(set.getKey()).size();
 				maxChestPopulation = Integer.parseInt(set.getValue().toString());
 				w = Bukkit.getServer().getWorld(set.getKey());
 			}catch(NumberFormatException e) {
@@ -274,7 +273,7 @@ public class LocationGenerator {
 					minHeight = 5;
 				}
 				Bukkit.getConsoleSender().sendMessage(PREFIX + "Generating chests for world \'" + w.getName() + "\'");
-				currentCounter = currentWorld.size() + 1;
+				currentCounter = currentWorld + 1;
 				for(int i = 0; i < maxChestPopulation; i++) {
 					if(currentCounter >= maxChestPopulation) {
 						saveLocation();

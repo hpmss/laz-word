@@ -10,6 +10,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import me.hpms.lootworld.util.NMSEntity;
+
 public class LootWorld extends JavaPlugin{
 	
 	private File path = new File(getDataFolder() + "");
@@ -52,8 +54,7 @@ public class LootWorld extends JavaPlugin{
 		rarity = new ChestRarity(this);
 		generator = new LocationGenerator(this);
 		listener = new EventListener(this);
-		getServer().getPluginManager().registerEvents(listener, this);	
-		
+		getServer().getPluginManager().registerEvents(listener, this);
 	}
 	
 	public void registerEntities() {
