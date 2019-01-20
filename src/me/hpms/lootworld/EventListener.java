@@ -17,7 +17,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
 
 import me.hpms.lootworld.util.TaskHandler;
 import net.md_5.bungee.api.ChatColor;
@@ -110,6 +109,7 @@ public class EventListener implements Listener {
 				            		loc.getWorld().playSound(loc, Sound.ENTITY_PLAYER_LEVELUP, 10, 10);
 							        loc.getWorld().spawnParticle(Particle.HEART, loc, 10);
 							        loc.getBlock().setType(Material.AIR);
+							        loc.getBlock().removeMetadata(s, plugin);
 							        if(!isEmpty(inv)) {
 							        	for(ItemStack item : inv.getContents()) {
 							        		loc.getWorld().dropItem(loc, item);
@@ -132,8 +132,13 @@ public class EventListener implements Listener {
 	@EventHandler
 	public void onBlockPlaceEvent(BlockPlaceEvent e) {
 		if(e.getItemInHand().getType() != Material.CHEST) return;
-		if(e.getItemInHand().getItemMeta().getDisplayName().equalsIgnoreCase(ChatColor.RED + "lwtest")) {
-			e.getBlockPlaced().setMetadata("Common", new FixedMetadataValue(plugin,"Common"));
+		if(!e.getItemInHand().getItemMeta().hasDisplayName()) return;
+		for(String s : rank) {
+			if(e.getItemInHand().getItemMeta().getDisplayName().equalsIgnoreCase(ChatColor.RED + s)) {
+				int itemAmountRank = (int) (Math.random() * ((plugin.getGenerator().maxItemRank - plugin.getGenerator().minItemRank) + 1)) + plugin.getGenerator().minItemRank;
+				int itemAmountAll = (int) (Math.random() * ((plugin.getGenerator().maxItemAll - plugin.getGenerator().minItemAll ) + 1)) + plugin.getGenerator().minItemAll;
+				new ChestProperty(plugin,e.getBlockPlaced().getLocation(),s,itemAmountAll,itemAmountRank);
+			}
 		}
 	}
 	

@@ -46,8 +46,6 @@ public class LootWorld extends JavaPlugin{
 		if(!getDataFolder().exists()) {
 			getDataFolder().mkdir();
 		}
-		this.getCommand("lwtest").setExecutor(new OnCommand());
-		
 		parser = new ItemParser(path);
 		nms = new NMSEntity();
 		registerEntities();
@@ -55,6 +53,7 @@ public class LootWorld extends JavaPlugin{
 		generator = new LocationGenerator(this);
 		listener = new EventListener(this);
 		getServer().getPluginManager().registerEvents(listener, this);
+		this.getCommand("lwtest").setExecutor(new OnCommand(this));
 	}
 	
 	public void registerEntities() {

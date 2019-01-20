@@ -60,13 +60,13 @@ public class LocationGenerator {
 	
 	private double minHeight = 5;
 	
-	private final int maxItemAll;
+	public final int maxItemAll;
 	
-	private final int minItemAll;
+	public final int minItemAll;
 	
-	private final int maxItemRank;
+	public final int maxItemRank;
 	
-	private final int minItemRank;
+	public final int minItemRank;
 	
 	private Random random = new Random();
 	

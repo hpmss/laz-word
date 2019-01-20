@@ -57,6 +57,21 @@ public class ChestProperty implements Comparable<ChestProperty>{
 		
 		this.content = populateChestItem();
 	}
+	public ChestProperty(LootWorld lw,Location loc,String rarity,int itemAmount,int itemAmountRank) {
+		plugin = lw;
+		this.loc = loc;
+		this.rarity = rarity;
+		this.itemAmount = itemAmount;
+		this.itemAmountRank = itemAmountRank;
+		this.metaData = new FixedMetadataValue(plugin,rarity);
+		
+		this.chest = (Chest) loc.getBlock().getState();
+		
+		chest.setMetadata(rarity, metaData);
+		
+		this.content = populateChestItem();
+	}
+	
 	public ChestProperty(LootWorld lw,int id,Location loc,String rarity,float probabilityDistribution) {
 		this.plugin = lw;
 		this.loc = loc;
