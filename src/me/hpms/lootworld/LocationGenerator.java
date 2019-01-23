@@ -100,19 +100,30 @@ public class LocationGenerator {
 		return locationConfig;
 	}
 	
-	public List<Location> getChestLocationList(String world) {
-		if(!location.containsKey(world)) {
-			return null;
-		}
-		List<Location> loc = new ArrayList<Location>();
-		List<ChestProperty> c = location.get(world);
-		for(ChestProperty ce : c) {
-			loc.add(ce.getLocation());
-		}
-		
-		return loc;
-	}
-	
+//	public BiMap<String,String> updateMapByWorld(String world,String loc) {
+//		BiMap<String,String> map = HashBiMap.create();
+//		if(!(location.containsKey(world))) {
+//			return null;
+//		}
+//		List<ChestProperty> list = location.get(world);
+//		Collections.reverse(list);
+//		for(ChestProperty c : list) {
+//			String value = c.toString();
+//			String key = c.getRarity() + "-" + c.getId();
+//			map.put(key, value);
+//		}
+//		if(!(map.inverse().containsKey(loc))) return null;
+//		map.inverse().remove(loc);
+//		locationConfig.createSection("location-" + world,map);
+//		String[] splitLoc = loc.split(",");
+//		Location l = new Location(Bukkit.getWorld(world),Double.parseDouble(splitLoc[0]),Double.parseDouble(splitLoc[1]),Double.parseDouble(splitLoc[2]));
+//		for(ChestProperty c : list) {
+//			
+//		}
+//		
+//		return map;
+//	}
+//	
 	public void loadConfiguration() {
 		if(!locationFile.exists()) {
 			try {
@@ -194,9 +205,7 @@ public class LocationGenerator {
 				}
 				for(ChestProperty c : writeLocation) {
 					location.get(w).add(c);
-					String loc = c.getLocation().getX() + "," +
-					c.getLocation().getY() + "," + c.getLocation().getZ() + "," + c.getLocation().getWorld().getName();
-					section.set(c.getRarity() + "-" + writer, loc);
+					section.set(c.getRarity() + "-" + writer, c.toString());
 					writer += 1;
 				}
 				

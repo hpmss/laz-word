@@ -95,6 +95,12 @@ public class ChestProperty implements Comparable<ChestProperty>{
 		return this.loc;
 	}
 	
+	@Override
+	public String toString() {
+		String s = loc.getX() + "," + loc.getY() + "," + loc.getZ() + "," + loc.getWorld().getName();
+		return s;
+	}
+	
 	public void reloadChest() {
 		this.metaData = new FixedMetadataValue(plugin,rarity);
 		this.loc.getBlock().setType(Material.CHEST);

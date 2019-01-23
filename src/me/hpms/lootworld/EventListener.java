@@ -18,10 +18,10 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.scheduler.BukkitScheduler;
 
 import com.google.common.collect.HashBiMap;
 
+import me.hpms.lootworld.util.TaskHandler;
 import net.md_5.bungee.api.ChatColor;
 
 public class EventListener implements Listener {
@@ -94,11 +94,9 @@ public class EventListener implements Listener {
 					Location loc = inv.getLocation();
 					if(activated == false) {
 						spaceBuffer(loc);
+						activated = true;
 					}
-					
-					activated = true;
-					BukkitScheduler scheduler = plugin.getServer().getScheduler();
-			        scheduler.scheduleSyncRepeatingTask(plugin, new Runnable() {
+					new TaskHandler(plugin,0,3) {
 						float r = 1.5f;
 						double phi = 0F;
 			            @Override
@@ -122,11 +120,11 @@ public class EventListener implements Listener {
 						        	}
 						        }
 						        activated = false;
-			            		scheduler.cancelAllTasks();
+			            		cancelTask();
 			            	}
 			           
 			            }
-			        }, 0L, 3);
+			        };
 					
 				}
 			}
