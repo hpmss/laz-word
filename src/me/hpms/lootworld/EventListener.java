@@ -1,7 +1,9 @@
 package me.hpms.lootworld;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import org.bukkit.Location;
@@ -18,6 +20,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import me.hpms.lootworld.util.NMSEntity;
 import me.hpms.lootworld.util.TaskHandler;
 import net.md_5.bungee.api.ChatColor;
 
@@ -27,16 +30,12 @@ public class EventListener implements Listener {
 
 	private LootWorld plugin;
 	
-	private List<String> rank;
-	
 	public List<Location> activated;
 	
 	private Random rand = new Random();
 	
-	
 	public EventListener(LootWorld lw) {
 		plugin = lw;
-		rank = new ArrayList<>(plugin.getChestRarity().getRanking().keySet());
 		activated = new ArrayList<Location>();
 		
 	}
@@ -58,13 +57,11 @@ public class EventListener implements Listener {
 		Player p = e.getPlayer();
 		if(e.getClickedBlock().getType() == Material.CHEST) {
 			Chest chest = (Chest) e.getClickedBlock().getState();
-			for(String s : rank) {
-				if(chest.hasMetadata(s)) {
-					String l = chest.getLocation().getX() + "," + 
-							   chest.getLocation().getY() + "," + chest.getLocation().getZ()+ "," + chest.getLocation().getWorld().getName();
-					plugin.getGenerator().updateConfigByWorld(p.getWorld().getName(), l, PREFIX +
-							ChatColor.RED + p.getName() + ChatColor.GREEN +" đã tìm thấy rương " + ChatColor.GOLD + s + " !");
-				}
+			if(chest.hasMetadata("LootWorld")) {
+				String id = String.valueOf(chest.getMetadata("LootWorld").get(0).value());
+				LocationGenerator.updateConfigByWorld(p.getWorld().getName(), id, PREFIX +
+						ChatColor.RED + p.getName() + ChatColor.GREEN +" đã tìm thấy rương " + ChatColor.GOLD + id.split("-")[0] + " !");
+				chest.removeMetadata("LootWorld", LootWorld.plugin);
 			}
 			
 		}
@@ -76,17 +73,18 @@ public class EventListener implements Listener {
 		Inventory inv = e.getInventory();
 		
 		if(inv.getHolder() instanceof Chest) {
-			for(String s : rank) {
-				if(inv.getLocation().getBlock().hasMetadata(s)) {
+				if(inv.getLocation().getBlock().hasMetadata("LootWorld")) {
 					Location loc = inv.getLocation();
+					String s = String.valueOf(loc.getBlock().getMetadata("LootWorld").get(0).value());
 					if(!activated.contains(loc)) {
 						activated.add(loc);
 						spaceBuffer(loc);
-						if(rank.size() >= 2) {
-							if(rank.subList(rank.size() - 2, rank.size()).contains(s)) {
+						if(ChestRarity.getRanking().size() >= 2) {
+							if(Arrays.asList(ChestRarity.getRanking().keySet().toArray(new String[ChestRarity.getRanking().keySet().size()]))
+									.subList(ChestRarity.getRanking().size() - 2, ChestRarity.getRanking().size()).contains(s.split("-")[0])) {
 								int a = rand.nextInt(4) + 1;
 								for(int i = 0; i < a;i++) {
-									plugin.getNMSEntity().spawnEntity(loc.getWorld(), loc.clone().add(rand.nextInt(3) , 0, rand.nextInt(3)));
+									NMSEntity.spawnEntity(loc.getWorld(), loc.clone().add(rand.nextInt(3) , 0, rand.nextInt(3)));
 								}
 							}
 						}	
@@ -126,18 +124,18 @@ public class EventListener implements Listener {
 					
 				}
 			}
-		}
+		
 	}
 	
 	@EventHandler
 	public void onBlockPlaceEvent(BlockPlaceEvent e) {
 		if(e.getItemInHand().getType() != Material.CHEST) return;
 		if(!e.getItemInHand().getItemMeta().hasDisplayName()) return;
-		for(String s : rank) {
-			if(e.getItemInHand().getItemMeta().getDisplayName().equalsIgnoreCase(ChatColor.RED + s)) {
-				int itemAmountRank = (int) (Math.random() * ((plugin.getGenerator().maxItemRank - plugin.getGenerator().minItemRank) + 1)) + plugin.getGenerator().minItemRank;
-				int itemAmountAll = (int) (Math.random() * ((plugin.getGenerator().maxItemAll - plugin.getGenerator().minItemAll ) + 1)) + plugin.getGenerator().minItemAll;
-				new ChestProperty(plugin,e.getBlockPlaced().getLocation(),s,itemAmountAll,itemAmountRank);
+		for(Entry<String, Float> entry : ChestRarity.getRanking().entrySet()) {
+			if(e.getItemInHand().getItemMeta().getDisplayName().equalsIgnoreCase(ChatColor.RED + entry.getKey())) {
+				int itemAmountRank = (int) (Math.random() * ((LocationGenerator.maxItemRank - LocationGenerator.minItemRank) + 1)) + LocationGenerator.minItemRank;
+				int itemAmountAll = (int) (Math.random() * ((LocationGenerator.maxItemAll - LocationGenerator.minItemAll ) + 1)) + LocationGenerator.minItemAll;
+				new ChestProperty(rand.nextInt(50000),e.getBlockPlaced().getLocation(),entry.getKey(),itemAmountAll,itemAmountRank,entry.getValue());
 			}
 		}
 	}

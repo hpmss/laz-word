@@ -2,37 +2,35 @@ package me.hpms.lootworld;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import me.hpms.lootworld.util.NMSEntity;
+import net.md_5.bungee.api.ChatColor;
 
 public class LootWorld extends JavaPlugin{
 	
 	private File path = new File(getDataFolder() + "");
 	
-	private EventListener listener;
+	private static EventListener listener;
 	
-	private ItemParser parser;
+	private static ItemParser parser;
 	
-	private LocationGenerator generator;
+	public static final String PREFIX = ChatColor.GREEN + "『 LootWorld 』" + ChatColor.BLUE + "-> ";
 	
-	private ChestRarity rarity;
-	
-	private NMSEntity nms;
-	
+	public static JavaPlugin plugin;
 	
 	@Override
 	public void onEnable() {
+		plugin = (JavaPlugin) Bukkit.getPluginManager().getPlugin("LootWorld");
 		instantiateLootWorld();
 	}
-	
 	
 	@Override
 	public void onDisable() {
@@ -47,66 +45,37 @@ public class LootWorld extends JavaPlugin{
 			getDataFolder().mkdir();
 		}
 		parser = new ItemParser(path);
-		nms = new NMSEntity();
+		ChestRarity.init();
+		new LocationGenerator();
 		registerEntities();
-		rarity = new ChestRarity(this);
-		generator = new LocationGenerator(this);
 		listener = new EventListener(this);
 		getServer().getPluginManager().registerEvents(listener, this);
-		this.getCommand("lwtest").setExecutor(new OnCommand(this));
+		this.getCommand("lwtest").setExecutor(new OnCommand());
 	}
 	
-	public void registerEntities() {
+	public static void registerEntities() {
 		try {
-			nms.registerEntity(EntityType.ZOMBIE, "ranged_zombie", CustomEntityMob.class);
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (NoSuchFieldException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+			NMSEntity.registerEntity(EntityType.ZOMBIE, "ranged_zombie", CustomEntityMob.class);
+		}catch(Exception e) {e.printStackTrace();}
 	}
 	
-	public HashMap<String,ArrayList<ItemConfig>> getParsedItems() {
+	public static HashMap<String,ArrayList<ItemConfig>> getParsedItems() {
 		return parser.getParsedItems();
 	}
 	
-	public List<ItemStack> getRankAllItems() {
+	public static List<ItemStack> getRankAllItems() {
 		return parser.getRankAllItems();
 	}
 	
-	public HashMap<ItemStack,Float> getRankAllItemsDistribution() {
+	public static HashMap<ItemStack,Float> getRankAllItemsDistribution() {
 		return parser.getRankAllItemsDistribution();
 	}
 	
-	public ItemParser getItemParser() {
+	public static ItemParser getItemParser() {
 		return parser;
 	}
 	
-	public LocationGenerator getGenerator() {
-		return generator;
-	}
-	
-	public ChestRarity getChestRarity() {
-		return rarity;
-	}
-	
-	public NMSEntity getNMSEntity() {
-		return nms;
-	}
-	
-	public void parseSourceFromJar(String pathToJar,BufferedWriter writer) {
+	public static void parseSourceFromJar(String pathToJar,BufferedWriter writer) {
 		parser.getJSONData(pathToJar, writer);
 	}
 	

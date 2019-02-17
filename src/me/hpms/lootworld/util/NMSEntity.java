@@ -25,9 +25,9 @@ public final class NMSEntity {
 	 * -> Feel free to use how ever you like
 	 */
 	
-	private final String NMSString;
+	private static final String NMSString;
 	
-	private final String OGCString;
+	private static final String OGCString;
 	
 	private static Class minecraftKey;
 	
@@ -39,9 +39,9 @@ public final class NMSEntity {
 	
 	private static Class craftWorld;
 	
-	private String name = ".Entity";
+	private static String name = ".Entity";
 	
-	public NMSEntity() {
+	static {
 		
 		String packageNameNMS = "net.minecraft.server.v";
 		String packageNameOGC = "org.bukkit.craftbukkit.v";
@@ -50,8 +50,8 @@ public final class NMSEntity {
 		packageNameNMS += version.replace(".", "_") + "_R" + bukkitVersion[1].substring(bukkitVersion[1].length() - 1);
 		packageNameOGC += version.replace(".", "_") + "_R" + bukkitVersion[1].substring(bukkitVersion[1].length() - 1);
 		
-		this.NMSString = packageNameNMS;
-		this.OGCString = packageNameOGC;
+		NMSString = packageNameNMS;
+		OGCString = packageNameOGC;
 		
 		try {
 			craftWorld = Class.forName(OGCString + ".CraftWorld");
@@ -76,7 +76,7 @@ public final class NMSEntity {
 	 */
 	
 	@SuppressWarnings({ "unchecked", "deprecation" })
-	public void registerEntity(final EntityType type,final String name,final Class<?> clazz) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, InstantiationException, NoSuchFieldException, ClassNotFoundException {
+	public static void registerEntity(final EntityType type,final String name,final Class<?> clazz) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, InstantiationException, NoSuchFieldException, ClassNotFoundException {
 		Object key = null;
 		Object a = null;
 		Method register = null;
@@ -95,7 +95,7 @@ public final class NMSEntity {
 		
 	}
 	
-	public Object getEntityClassByName(String n) {
+	public static Object getEntityClassByName(String n) {
 		Object clazz = null;
 		name += StringUtils.capitalize(n);
 		try {
@@ -114,13 +114,13 @@ public final class NMSEntity {
 	 */
 	
 	@SuppressWarnings("unchecked")
-	private <T> T castCraftWorld(World w) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private static <T> T castCraftWorld(World w) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		Object castedCraftWorld = craftWorld.cast(w);
 		Method getHandle = castedCraftWorld.getClass().getDeclaredMethod("getHandle");
 		Object worldServer = getHandle.invoke(castedCraftWorld);
 		return (T) worldServer;
 	}
-	public void spawnEntity(World w,Location loc) {
+	public static void spawnEntity(World w,Location loc) {
 		CustomEntityMob entity;
 		Object castedCraftWorld = craftWorld.cast(w);
 		try {	
@@ -246,8 +246,8 @@ public final class NMSEntity {
 	 * -----
 	 */
 	
-	public String getNMSPackage() {
-		return this.NMSString;
+	public static String getNMSPackage() {
+		return NMSString;
 	}
 	
 	public static Object getFieldObject(String fieldName,Class<?> clazz,Object object) {
@@ -269,7 +269,7 @@ public final class NMSEntity {
 		return j;
 	}
 
-	public Object getFieldObjectPublic(String fieldName,Class<?> clazz,Object object) {
+	public static Object getFieldObjectPublic(String fieldName,Class<?> clazz,Object object) {
 		
 		Field f;
 		Object j = null;

@@ -12,38 +12,39 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import net.md_5.bungee.api.ChatColor;
-
 public class ChestRarity {
 	
-	private final String PREFIX = ChatColor.GREEN + "『 LootWorld 』" + ChatColor.BLUE + "-> ";
+	private static FileConfiguration pluginConfig;
 	
-	private LootWorld plugin;
+	private static LinkedHashMap<String,Float> rank;
 	
-	private FileConfiguration pluginConfig;
+	private static float totalProbability;
 	
-	private LinkedHashMap<String,Float> rank;
-	
-	private float totalProbability;
-	
-	public ChestRarity(LootWorld lw) {
-		plugin = lw;
-		pluginConfig = plugin.getConfig();
+	public static void init() {
+		pluginConfig = LootWorld.plugin.getConfig();
 		rank = new LinkedHashMap<String,Float>();
 		loadRank();
-		this.rank =  (LinkedHashMap<String, Float>) sortByValue(rank);
-		
+		rank =  (LinkedHashMap<String, Float>) sortByValue(rank);
 	}
 	
-	public HashMap<String,Float> getRanking() {
+	public static HashMap<String,Float> getRanking() {
 		return rank;
 	}
 	
-	public float getTotalProbability() {
-		return this.totalProbability;
+	public static float getTotalProbability() {
+		return totalProbability;
 	}
 	
-	public <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
+	public static float getProbabilityByName(String name) {
+		float prob;
+		if(!rank.containsKey(name)) {
+			throw new NullPointerException("Rank not found...");
+		}
+		prob = rank.get(name);
+		return prob;
+	}
+	
+	private static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
         List<Entry<K, V>> list = new ArrayList<>(map.entrySet());
         list.sort(Entry.comparingByValue());
         Collections.reverse(list);
@@ -56,11 +57,11 @@ public class ChestRarity {
         return result;
     }
 	
-	private void loadRank() {
+	private static void loadRank() {
 		
 		ConfigurationSection section = pluginConfig.getConfigurationSection("rank");
 		Map<String,Object> rankMap = section.getValues(false);
-		for(Entry<String,Object> entry : rankMap.entrySet()) {
+		for(Map.Entry<String,Object> entry : rankMap.entrySet()) {
 			try {
 				float prob = Float.parseFloat(entry.getValue().toString());
 				if(String.valueOf(prob).startsWith("0.")) {
@@ -69,19 +70,10 @@ public class ChestRarity {
 				totalProbability += prob;
 				rank.put(entry.getKey().toString(), prob);
 			}catch(NumberFormatException e ) {
-				Bukkit.getConsoleSender().sendMessage(PREFIX + "Cannot parse probability for rank \'" + entry.getKey() + "\'");
+				Bukkit.getConsoleSender().sendMessage(LootWorld.PREFIX + "Cannot parse probability for rank \'" + entry.getKey() + "\'");
 			}	
 		}
 		
-	}
-	
-	public float getProbabilityByName(String name) {
-		float prob;
-		if(!rank.containsKey(name)) {
-			throw new NullPointerException("Rank not found...");
-		}
-		prob = rank.get(name);
-		return prob;
 	}
 	
 }

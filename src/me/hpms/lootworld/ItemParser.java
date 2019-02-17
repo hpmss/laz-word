@@ -24,8 +24,6 @@ import org.json.simple.parser.ParseException;
 
 public class ItemParser {
 	
-	private final String PREFIX = ChatColor.GREEN + "『 LootWorld 』" + ChatColor.BLUE + "-> ";
-	
 	private String stringEnchantment;
 	
 	private Material material = Material.BED;
@@ -108,13 +106,13 @@ public class ItemParser {
 							case "rank": this.rank = StringUtils.capitalize(itemValue.toString());break;
 							}
 						}catch(NumberFormatException e) {
-							Bukkit.getConsoleSender().sendMessage(PREFIX + "either \'amount\' have incorrect format...");
+							Bukkit.getConsoleSender().sendMessage(LootWorld.PREFIX + "either \'amount\' have incorrect format...");
 							return;
 							
 						}catch(ClassCastException e) {
-							Bukkit.getConsoleSender().sendMessage(PREFIX + "make sure \'material\' is valid...");
-							Bukkit.getConsoleSender().sendMessage(PREFIX + "make sure \'enchantment\' has key(enchantment_name),value(level) format...");
-							Bukkit.getConsoleSender().sendMessage(PREFIX + "make sure \'lore\' is a list of strings");
+							Bukkit.getConsoleSender().sendMessage(LootWorld.PREFIX + "make sure \'material\' is valid...");
+							Bukkit.getConsoleSender().sendMessage(LootWorld.PREFIX + "make sure \'enchantment\' has key(enchantment_name),value(level) format...");
+							Bukkit.getConsoleSender().sendMessage(LootWorld.PREFIX + "make sure \'lore\' is a list of strings");
 							e.printStackTrace();
 							return;
 						}
@@ -135,13 +133,13 @@ public class ItemParser {
 				}
 				
 			} catch (FileNotFoundException e) {
-				Bukkit.getConsoleSender().sendMessage(PREFIX + "items.json is not found...");
+				Bukkit.getConsoleSender().sendMessage(LootWorld.PREFIX + "items.json is not found...");
 				return;
 			} catch (IOException e) {
-				Bukkit.getConsoleSender().sendMessage(PREFIX + "items.json seems to be corrupted...");
+				Bukkit.getConsoleSender().sendMessage(LootWorld.PREFIX + "items.json seems to be corrupted...");
 				return;
 			} catch (ParseException e) {
-				Bukkit.getConsoleSender().sendMessage(PREFIX + "items.json is unparsable...");
+				Bukkit.getConsoleSender().sendMessage(LootWorld.PREFIX + "items.json is unparsable...");
 				return;
 			}
 			
@@ -171,11 +169,11 @@ public class ItemParser {
 					try {
 						enchantment.put(entry[0].trim(), Integer.parseInt(entry[1].trim()));
 					}catch(NumberFormatException e) {
-						Bukkit.getConsoleSender().sendMessage(PREFIX + "make sure level specified is a valid integer...");
+						Bukkit.getConsoleSender().sendMessage(LootWorld.PREFIX + "make sure level specified is a valid integer...");
 						e.printStackTrace();
 					}
 				}else {
-					Bukkit.getConsoleSender().sendMessage(PREFIX + "level for \'" + entry[0] + "\' not specified ? ...");
+					Bukkit.getConsoleSender().sendMessage(LootWorld.PREFIX + "level for \'" + entry[0] + "\' not specified ? ...");
 				}
 			}
 		}
@@ -194,7 +192,7 @@ public class ItemParser {
 				fileEnchantment.createNewFile();
 				writer = new BufferedWriter(new FileWriter(fileEnchantment.getPath()));
 				getJSONData("enchantment.json",writer);
-				Bukkit.getConsoleSender().sendMessage( PREFIX + "new enchantment.json file created...");
+				Bukkit.getConsoleSender().sendMessage( LootWorld.PREFIX + "new enchantment.json file created...");
 				
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -212,7 +210,7 @@ public class ItemParser {
 				fileItem.createNewFile();
 				writer = new BufferedWriter(new FileWriter(fileItem.getPath()));
 				getJSONData("items.json",writer);
-				Bukkit.getConsoleSender().sendMessage(PREFIX + "new items.json file created...");
+				Bukkit.getConsoleSender().sendMessage(LootWorld.PREFIX + "new items.json file created...");
 				
 			} catch (IOException e) {
 				e.printStackTrace();

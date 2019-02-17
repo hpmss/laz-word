@@ -1,9 +1,7 @@
 package me.hpms.lootworld;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
@@ -16,17 +14,11 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 public class ChestProperty implements Comparable<ChestProperty>{
 	
-	private final String PREFIX = ChatColor.GREEN + "『 LootWorld 』" + ChatColor.BLUE + "-> ";
-	
-	private LootWorld plugin;
-	
 	private Location loc;
 	
 	private Chest chest;
 	
 	private String rarity;
-	
-	private List<ItemStack> content;
 	
 	private int itemAmount;
 	
@@ -39,50 +31,30 @@ public class ChestProperty implements Comparable<ChestProperty>{
 	private int id;
 
 	
-	public ChestProperty(LootWorld lw,int id,Location loc,String rarity,int itemAmount,int itemAmountRank,float probabilityDistribution) {
-		plugin = lw;
+	public ChestProperty(int id,Location loc,String rarity,int itemAmount,int itemAmountRank,float probabilityDistribution) {
 		this.loc = loc;
 		this.rarity = rarity;
 		this.itemAmount = itemAmount;
 		this.itemAmountRank = itemAmountRank;
 		this.probabilityDistribution = probabilityDistribution;
-		this.metaData = new FixedMetadataValue(plugin,rarity);
+		this.metaData = new FixedMetadataValue(LootWorld.plugin,rarity + "-" + String.valueOf(id));
 		this.id = id;
 		
 		this.loc.getBlock().setType(Material.CHEST);
 		
 		this.chest = (Chest) loc.getBlock().getState();
 		
-		chest.setMetadata(rarity, metaData);
+		chest.setMetadata("LootWorld", metaData);
 		
-		this.content = populateChestItem();
-	}
-	public ChestProperty(LootWorld lw,Location loc,String rarity,int itemAmount,int itemAmountRank) {
-		plugin = lw;
-		this.loc = loc;
-		this.rarity = rarity;
-		this.itemAmount = itemAmount;
-		this.itemAmountRank = itemAmountRank;
-		this.metaData = new FixedMetadataValue(plugin,rarity);
-		
-		this.chest = (Chest) loc.getBlock().getState();
-		
-		chest.setMetadata(rarity, metaData);
-		
-		this.content = populateChestItem();
+		populateChestItem();
 	}
 	
-	public ChestProperty(LootWorld lw,int id,Location loc,String rarity,float probabilityDistribution) {
-		this.plugin = lw;
+	public ChestProperty(int id,Location loc,String rarity,float probabilityDistribution) {
 		this.loc = loc;
 		this.rarity = rarity;
 		this.id = id;
 		this.probabilityDistribution = probabilityDistribution;
-	}
-	
-	
-	public Chest getChestBlock() {
-		return chest;
+		this.metaData = new FixedMetadataValue(LootWorld.plugin,rarity + "-" + String.valueOf(id));
 	}
 	
 	public int getId() {
@@ -93,16 +65,8 @@ public class ChestProperty implements Comparable<ChestProperty>{
 		return rarity;
 	}
 	
-	public List<ItemStack> getChestContent() {
-		return content;
-	}
-	
 	public float getChestDistributionRate() {
 		return probabilityDistribution;
-	}
-	
-	public FixedMetadataValue getFixedMetadata() {
-		return metaData;
 	}
 	
 	public Location getLocation() {
@@ -120,16 +84,14 @@ public class ChestProperty implements Comparable<ChestProperty>{
 	}
 	
 	public void reloadChest() {
-		this.metaData = new FixedMetadataValue(plugin,rarity);
 		this.chest = (Chest) loc.getBlock().getState();
-		chest.setMetadata(rarity, metaData);
-		this.content = Arrays.asList(chest.getInventory().getContents());
+		chest.setMetadata("LootWorld", metaData);
 	}
 	
 	private ArrayList<ItemStack> populateChestItem() {
 		
 		ArrayList<ItemStack> itemList = new ArrayList<ItemStack>();
-		ArrayList<ItemConfig> rankItem = plugin.getParsedItems().get(rarity);		
+		ArrayList<ItemConfig> rankItem = LootWorld.getParsedItems().get(rarity);		
 		
 		float probabilityRank = 1f;
 		try {
@@ -137,14 +99,14 @@ public class ChestProperty implements Comparable<ChestProperty>{
 				probabilityRank = probabilityRank / (float)rankItem.size();
 			}
 		}catch(NullPointerException e) {
-			Bukkit.getConsoleSender().sendMessage(PREFIX + "Unknown rank: " + ChatColor.RED + rarity);
-			Bukkit.getConsoleSender().sendMessage(PREFIX + "Does item with rank " + ChatColor.RED + rarity + ChatColor.BLUE + " exists in items.json ?");
+			Bukkit.getConsoleSender().sendMessage(LootWorld.PREFIX + "Unknown rank: " + ChatColor.RED + rarity);
+			Bukkit.getConsoleSender().sendMessage(LootWorld.PREFIX + "Does item with rank " + ChatColor.RED + rarity + ChatColor.BLUE + " exists in items.json ?");
 		}
 		
 		
 		for(int i = 0; i < itemAmount; i ++) {
 			double t = 0;
-			for(Entry<ItemStack, Float> item : plugin.getRankAllItemsDistribution().entrySet()) {
+			for(Entry<ItemStack, Float> item : LootWorld.getRankAllItemsDistribution().entrySet()) {
 				t += item.getValue();
 				double outcome = Math.random();
 				if(t >= outcome) {
@@ -180,7 +142,7 @@ public class ChestProperty implements Comparable<ChestProperty>{
 
 	@Override
 	public int compareTo(ChestProperty o) {
-		return (int) (this.probabilityDistribution - o.getChestDistributionRate());
+		return (int) (this.getId() - o.getId());
 	}
 	
 

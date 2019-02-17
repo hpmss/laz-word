@@ -1,5 +1,7 @@
 eclipse.preferences.version=1
+encoding//src/me/hpms/lootworld/ChestProperty.java=UTF-8
 encoding//src/me/hpms/lootworld/ChestRarity.java=UTF-8
 encoding//src/me/hpms/lootworld/EventListener.java=UTF-8
 encoding//src/me/hpms/lootworld/ItemParser.java=UTF-8
 encoding//src/me/hpms/lootworld/LocationGenerator.java=UTF-8
+encoding//src/me/hpms/lootworld/LootWorld.java=UTF-8

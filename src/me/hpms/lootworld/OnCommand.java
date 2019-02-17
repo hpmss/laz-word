@@ -15,13 +15,10 @@ import net.md_5.bungee.api.ChatColor;
 
 public class OnCommand implements CommandExecutor{
 	
-	private LootWorld plugin;
-	
 	private ArrayList<String> rank;
 	
-	public OnCommand(LootWorld lw) {
-		this.plugin = lw;
-		rank = new ArrayList<>(plugin.getChestRarity().getRanking().keySet());
+	public OnCommand() {
+		rank = new ArrayList<>(ChestRarity.getRanking().keySet());
 	}
 	
 	@Override
