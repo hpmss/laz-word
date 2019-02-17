@@ -122,7 +122,6 @@ public class LocationGenerator {
 		Bukkit.getConsoleSender().sendMessage(LootWorld.PREFIX + "Wrapping up...");
 		ConfigurationSection section;
 		Map<String,Object> keyValue;
-		
 		for(String worldName : WORLD_MAP.keySet()) {
 			section = locationConfig.getConfigurationSection("location-" + worldName);
 			keyValue = (LinkedHashMap<String, Object>) section.getValues(false);
@@ -145,6 +144,7 @@ public class LocationGenerator {
 			
 		}
 	}
+	
 	public void saveLocation(String w) {
 		ConfigurationSection section;
 		section = locationConfig.getConfigurationSection("location-" + w);
@@ -184,7 +184,7 @@ public class LocationGenerator {
 		double range = (positiveBoundary - negativeBoundary) + 1;
 		World w = null;
 		int currentWorldCounter;
-		int currentId = 1;
+		int currentId;
 		double x;
 		double y;
 		double z;
@@ -193,6 +193,7 @@ public class LocationGenerator {
 		int itemAmountAll;
 		Map.Entry<String,Float> entry;
 		for(Map.Entry<String,Object> set : WORLD_MAP.entrySet()) {
+			currentId = 1;
 			try {
 				currentWorldCounter = pseudoRead(set.getKey()) + 1;
 				maxChestPopulation = Integer.parseInt(set.getValue().toString());
