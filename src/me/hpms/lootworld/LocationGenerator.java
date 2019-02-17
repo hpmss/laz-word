@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +27,6 @@ public class LocationGenerator {
 	private static FileConfiguration locationConfig;
 	
 	private static FileConfiguration pluginConfig;
-	
-	private static HashMap<String,LinkedHashMap<String,String>> LOCATION_MAP;
 
 	private static Map<String, Object> WORLD_MAP;
 	
@@ -51,7 +48,6 @@ public class LocationGenerator {
 	
 	
 	static {
-		LOCATION_MAP = new HashMap<String,LinkedHashMap<String,String>>();
 		pluginConfig = LootWorld.plugin.getConfig();
 		locationFile = new File(LootWorld.plugin.getDataFolder(), "location.yml");
 		WORLD_MAP = pluginConfig.getConfigurationSection("worlds").getValues(false);
@@ -83,18 +79,14 @@ public class LocationGenerator {
 	}
 	
 	public static void updateConfigByWorld(String world,String id,String... message) {
-		if(!LOCATION_MAP.containsKey(world)) return;
-		if(LOCATION_MAP.get(world).containsKey(id)) {
-			LOCATION_MAP.get(world).remove(id);
-			if(message.length != 0) {
-				locationConfig.createSection("location-" + world , LOCATION_MAP.get(world));
-				for(String m : message) {
-					Bukkit.getServer().broadcastMessage(m);
-				}
+		if(locationConfig.getConfigurationSection("location-" + world) == null) return;
+		locationConfig.getConfigurationSection("location-" + world).set(id, null);
+		if(message.length != 0) {
+			for(String m : message) {
+				Bukkit.getServer().broadcastMessage(m);
 			}
 		}
 		saveConfiguration();
-		
 	}
 	
 	public void loadConfiguration() {
@@ -110,7 +102,6 @@ public class LocationGenerator {
 		}
 		locationConfig = YamlConfiguration.loadConfiguration(locationFile);
 		for(String worldName : WORLD_MAP.keySet()) {
-			LOCATION_MAP.put(worldName, new LinkedHashMap<String,String>());
 			if(locationConfig.getConfigurationSection("location-" + worldName ) == null) {
 				locationConfig.createSection("location-" + worldName);
 				saveConfiguration();
@@ -130,12 +121,12 @@ public class LocationGenerator {
 	public void readConfiguration() {
 		Bukkit.getConsoleSender().sendMessage(LootWorld.PREFIX + "Wrapping up...");
 		ConfigurationSection section;
-		LinkedHashMap<String,Object> keyValue;
-
+		Map<String,Object> keyValue;
+		
 		for(String worldName : WORLD_MAP.keySet()) {
 			section = locationConfig.getConfigurationSection("location-" + worldName);
 			keyValue = (LinkedHashMap<String, Object>) section.getValues(false);
-			if(keyValue.size() == 0||keyValue.size() == LOCATION_MAP.get(worldName).size()) {
+			if(keyValue.size() == 0) {
 				break;
 			}
 			keyValue.forEach((key,value) -> {
@@ -146,18 +137,13 @@ public class LocationGenerator {
 					double y = Double.parseDouble(locationSplit[1]);
 					double z = Double.parseDouble(locationSplit[2]);
 					World worldz = Bukkit.getWorld(locationSplit[3]);
-					ChestProperty c = new ChestProperty(Integer.parseInt(keySplit[1]),new Location(worldz,x,y,z),keySplit[0],ChestRarity.getProbabilityByName(keySplit[0]));
-					c.reloadChest();
-					if(!LOCATION_MAP.get(worldName).containsKey(c.toIdString())) {
-						LOCATION_MAP.get(worldName).put(c.toIdString(), c.toString());
-					}
+					ChestProperty.reloadChest(Integer.valueOf(keySplit[1]), new Location(worldz,x,y,z), keySplit[0]);
 				}catch(NumberFormatException e) {
 					System.out.print(e);
 				}
 			});
 			
 		}
-		
 	}
 	public void saveLocation(String w) {
 		ConfigurationSection section;
@@ -165,7 +151,6 @@ public class LocationGenerator {
 		if(writeLocation.size() != 0) {
 			Collections.sort(writeLocation);
 			for(ChestProperty c : writeLocation) {
-				LOCATION_MAP.get(w).put(c.toIdString(), c.toString());
 				section.set(c.toIdString(), c.toString());
 			}
 				
@@ -199,7 +184,7 @@ public class LocationGenerator {
 		double range = (positiveBoundary - negativeBoundary) + 1;
 		World w = null;
 		int currentWorldCounter;
-		int currentId;
+		int currentId = 1;
 		double x;
 		double y;
 		double z;
@@ -212,8 +197,10 @@ public class LocationGenerator {
 				currentWorldCounter = pseudoRead(set.getKey()) + 1;
 				maxChestPopulation = Integer.parseInt(set.getValue().toString());
 				w = Bukkit.getServer().getWorld(set.getKey());
-				String last = new ArrayList<>(locationConfig.getConfigurationSection("location-" + set.getKey()).getValues(false).keySet()).get(currentWorldCounter - 2);
-				currentId = (currentWorldCounter == 1) ? 1 : Integer.valueOf(last.split("-")[1]);
+				if(locationConfig.getConfigurationSection("location-" + set.getKey()).getValues(false).size() != 0) {
+					String last = new ArrayList<>(locationConfig.getConfigurationSection("location-" + set.getKey()).getValues(false).keySet()).get(currentWorldCounter - 2);
+					currentId = (currentWorldCounter == 1) ? 1 : Integer.valueOf(last.split("-")[1]) + 1;
+				}
 			}catch(NumberFormatException e) {
 				Bukkit.getConsoleSender().sendMessage(LootWorld.PREFIX + "Cannot parse amount of chest population for world \'" + set.getKey() + "\'");
 				return;
@@ -286,7 +273,7 @@ public class LocationGenerator {
 							}
 						}
 					}
-					loc = new Location(w,(double)(int)x,(double)(int)y,(double)(int)z);
+					loc = new Location(w,Math.floor(x),Math.floor(y),Math.floor(z));
 					currentWorldCounter += 1;
 					if(currentWorldCounter % 100 == 0) {
 						Bukkit.getConsoleSender().sendMessage(LootWorld.PREFIX + " " + currentWorldCounter + " chests generated...");

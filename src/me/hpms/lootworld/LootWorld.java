@@ -48,7 +48,7 @@ public class LootWorld extends JavaPlugin{
 		ChestRarity.init();
 		new LocationGenerator();
 		registerEntities();
-		listener = new EventListener(this);
+		listener = new EventListener();
 		getServer().getPluginManager().registerEvents(listener, this);
 		this.getCommand("lwtest").setExecutor(new OnCommand());
 	}

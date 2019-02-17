@@ -49,14 +49,6 @@ public class ChestProperty implements Comparable<ChestProperty>{
 		populateChestItem();
 	}
 	
-	public ChestProperty(int id,Location loc,String rarity,float probabilityDistribution) {
-		this.loc = loc;
-		this.rarity = rarity;
-		this.id = id;
-		this.probabilityDistribution = probabilityDistribution;
-		this.metaData = new FixedMetadataValue(LootWorld.plugin,rarity + "-" + String.valueOf(id));
-	}
-	
 	public int getId() {
 		return this.id;
 	}
@@ -83,9 +75,8 @@ public class ChestProperty implements Comparable<ChestProperty>{
 		return s;
 	}
 	
-	public void reloadChest() {
-		this.chest = (Chest) loc.getBlock().getState();
-		chest.setMetadata("LootWorld", metaData);
+	public static void reloadChest(int id,Location loc,String rarity) {
+		loc.getBlock().setMetadata("LootWorld", new FixedMetadataValue(LootWorld.plugin,rarity + "-" + id));
 	}
 	
 	private ArrayList<ItemStack> populateChestItem() {

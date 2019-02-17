@@ -24,30 +24,44 @@ import org.json.simple.parser.ParseException;
 
 public class ItemParser {
 	
-	private String stringEnchantment;
+	private static String stringEnchantment;
 	
-	private Material material = Material.BED;
+	private static Material material;
 	
-	private String name = material.toString();
+	private static String name;
 
-	private int amount = 1;
+	private static int amount;
 	
-	private List<String> lore = new ArrayList<String>();
+	private static List<String> lore;
 	
-	private HashMap<String,Integer> enchantment = null;
+	private static HashMap<String,Integer> enchantment;
 	
-	private String rank = "all";
+	private static String rank;
 	
-	private HashMap<String,ArrayList<ItemConfig>> items = new HashMap<String,ArrayList<ItemConfig>>();
+	private static HashMap<String,ArrayList<ItemConfig>> items;
 	
-	private ArrayList<ItemStack> rankAllItems = new ArrayList<ItemStack>();
+	private static ArrayList<ItemStack> rankAllItems;
 	
-	private int rankAllCounter = 0;
+	private static int rankAllCounter;
 	
-	private HashMap<ItemStack,Float> itemsMap;
+	private static HashMap<ItemStack,Float> itemsMap;
+	
+	static {
+		
+		 material = Material.BED;
+		 name = material.toString();
+		 amount = 1;
+		 lore = new ArrayList<String>();
+		 enchantment = null;
+		 rank = "all";
+		 items = new HashMap<String,ArrayList<ItemConfig>>();
+		 rankAllItems = new ArrayList<ItemStack>();
+		 rankAllCounter = 0;
+		 itemsMap = new HashMap<ItemStack,Float>();
+		
+	}
 	
 	private File getDataFolder;
-	
 	
 	public ItemParser(File getDataFolder) {
 		this.getDataFolder = getDataFolder;
@@ -57,7 +71,6 @@ public class ItemParser {
 			e.printStackTrace();
 		}
 		parseCustomItem(getDataFolder);
-		itemsMap = new HashMap<ItemStack,Float>();
 		if(rankAllCounter != 0) {
 			float prob = 1.0f / (float)rankAllCounter;
 			
@@ -68,18 +81,17 @@ public class ItemParser {
 	}
 	
 	public HashMap<String,ArrayList<ItemConfig>> getParsedItems() {
-		return this.items;
+		return items;
 	}
 	
 	public List<ItemStack> getRankAllItems() {
-		return this.rankAllItems;
+		return rankAllItems;
 	}
 	
 	public HashMap<ItemStack,Float> getRankAllItemsDistribution() {
 		return itemsMap;
 	}
 	
-	//Class Methods
 	@SuppressWarnings("unchecked")
 	public void parseCustomItem(File file) {
 		
@@ -98,12 +110,12 @@ public class ItemParser {
 						Object itemValue = itemMap.get(keySet);
 						try {
 							switch(keySet) {
-							case "name": this.name = itemValue.toString();break;
-							case "material": this.material = Material.valueOf(itemValue.toString());break;
-							case "amount": this.amount = Integer.parseInt(itemValue.toString());break;
-							case "lore": this.lore = convertColor((List<String>) itemValue);break;
-							case "enchantment": this.stringEnchantment = itemValue.toString();this.enchantment = convertStringToHashMap(stringEnchantment);break;
-							case "rank": this.rank = StringUtils.capitalize(itemValue.toString());break;
+							case "name": name = itemValue.toString();break;
+							case "material": material = Material.valueOf(itemValue.toString());break;
+							case "amount": amount = Integer.parseInt(itemValue.toString());break;
+							case "lore": lore = convertColor((List<String>) itemValue);break;
+							case "enchantment": stringEnchantment = itemValue.toString();enchantment = convertStringToHashMap(stringEnchantment);break;
+							case "rank": rank = StringUtils.capitalize(itemValue.toString());break;
 							}
 						}catch(NumberFormatException e) {
 							Bukkit.getConsoleSender().sendMessage(LootWorld.PREFIX + "either \'amount\' have incorrect format...");
@@ -147,17 +159,16 @@ public class ItemParser {
 			
 		}
 	
-	public void resetDefault() {
+	private static void resetDefault() {
 		material = Material.BED;
 		name = material.name();
-
 		amount = 1;
 		lore = new ArrayList<String>();
 		enchantment = null;
 		rank = "all";
 	}
 	
-	public HashMap<String,Integer> convertStringToHashMap(String stringHashMap) {
+	private static HashMap<String,Integer> convertStringToHashMap(String stringHashMap) {
 		HashMap<String,Integer> enchantment = new HashMap<String,Integer>();
 		
 		stringHashMap = stringHashMap.substring(1,stringHashMap.length() - 1);
@@ -179,8 +190,16 @@ public class ItemParser {
 		}
 		return enchantment;
 	}
+	
+	public static List<String> convertColor(List<String> list) {
+		List<String> converted = new ArrayList<String>();
+		for(String s : list) {
+			converted.add(ChatColor.translateAlternateColorCodes('&', s));
+		}
+		return converted;
+	}
 		
-	public void generateRequiredJSONFile() throws IOException {
+	private void generateRequiredJSONFile() throws IOException {
 		File fileEnchantment = new File(getDataFolder.getPath() + "/enchantment.json");
 		File fileItem = new File(getDataFolder.getPath() + "/items.json");
 		BufferedWriter writer = null;
@@ -222,14 +241,6 @@ public class ItemParser {
 				}
 			}
 		}
-	}
-	
-	public List<String> convertColor(List<String> list) {
-		List<String> converted = new ArrayList<String>();
-		for(String s : list) {
-			converted.add(ChatColor.translateAlternateColorCodes('&', s));
-		}
-		return converted;
 	}
 	
 	public void getJSONData(String fileToReadFromJar,BufferedWriter writer) {

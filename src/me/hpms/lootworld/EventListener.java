@@ -1,7 +1,6 @@
 package me.hpms.lootworld;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -11,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Chest;
+import org.bukkit.craftbukkit.libs.jline.internal.Log;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,25 +19,24 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import me.hpms.lootworld.util.NMSEntity;
 import me.hpms.lootworld.util.TaskHandler;
 import net.md_5.bungee.api.ChatColor;
 
 public class EventListener implements Listener {
-	
-	private final String PREFIX = ChatColor.GREEN + "『 LootWorld 』" + ChatColor.BLUE + "-> ";
 
-	private LootWorld plugin;
+	private static JavaPlugin plugin;
 	
-	public List<Location> activated;
+	public static List<Location> activated;
 	
-	private Random rand = new Random();
+	private static Random rand;
 	
-	public EventListener(LootWorld lw) {
-		plugin = lw;
+	static {
+		plugin = LootWorld.plugin;
 		activated = new ArrayList<Location>();
-		
+		rand = new Random();
 	}
 	
 	public static boolean isEmpty(Inventory inv) {
@@ -59,9 +58,8 @@ public class EventListener implements Listener {
 			Chest chest = (Chest) e.getClickedBlock().getState();
 			if(chest.hasMetadata("LootWorld")) {
 				String id = String.valueOf(chest.getMetadata("LootWorld").get(0).value());
-				LocationGenerator.updateConfigByWorld(p.getWorld().getName(), id, PREFIX +
+				LocationGenerator.updateConfigByWorld(p.getWorld().getName(), id, LootWorld.PREFIX +
 						ChatColor.RED + p.getName() + ChatColor.GREEN +" đã tìm thấy rương " + ChatColor.GOLD + id.split("-")[0] + " !");
-				chest.removeMetadata("LootWorld", LootWorld.plugin);
 			}
 			
 		}
@@ -79,16 +77,15 @@ public class EventListener implements Listener {
 					if(!activated.contains(loc)) {
 						activated.add(loc);
 						spaceBuffer(loc);
-						if(ChestRarity.getRanking().size() >= 2) {
-							if(Arrays.asList(ChestRarity.getRanking().keySet().toArray(new String[ChestRarity.getRanking().keySet().size()]))
-									.subList(ChestRarity.getRanking().size() - 2, ChestRarity.getRanking().size()).contains(s.split("-")[0])) {
+						ArrayList<String> set = new ArrayList<>(ChestRarity.getRanking().keySet());
+						if(set.size() >= 2) {
+							if(set.subList(set.size() - 2, set.size()).contains(s.split("-")[0])) {
 								int a = rand.nextInt(4) + 1;
 								for(int i = 0; i < a;i++) {
 									NMSEntity.spawnEntity(loc.getWorld(), loc.clone().add(rand.nextInt(3) , 0, rand.nextInt(3)));
 								}
 							}
 						}	
-						@SuppressWarnings("unused")
 						TaskHandler handler = new TaskHandler(plugin,0,3) {
 							float r = 1.5f;
 							double phi = 0F;
@@ -107,7 +104,7 @@ public class EventListener implements Listener {
 				            		loc.getWorld().playSound(loc, Sound.ENTITY_PLAYER_LEVELUP, 10, 10);
 							        loc.getWorld().spawnParticle(Particle.HEART, loc, 10);
 							        loc.getBlock().setType(Material.AIR);
-							        loc.getBlock().removeMetadata(s, plugin);
+							        loc.getBlock().removeMetadata("LootWorld", plugin);
 							        if(!isEmpty(inv)) {
 							        	for(ItemStack item : inv.getContents()) {
 							        		loc.getWorld().dropItem(loc, item);
@@ -132,6 +129,7 @@ public class EventListener implements Listener {
 		if(e.getItemInHand().getType() != Material.CHEST) return;
 		if(!e.getItemInHand().getItemMeta().hasDisplayName()) return;
 		for(Entry<String, Float> entry : ChestRarity.getRanking().entrySet()) {
+			Log.info(entry.getKey());
 			if(e.getItemInHand().getItemMeta().getDisplayName().equalsIgnoreCase(ChatColor.RED + entry.getKey())) {
 				int itemAmountRank = (int) (Math.random() * ((LocationGenerator.maxItemRank - LocationGenerator.minItemRank) + 1)) + LocationGenerator.minItemRank;
 				int itemAmountAll = (int) (Math.random() * ((LocationGenerator.maxItemAll - LocationGenerator.minItemAll ) + 1)) + LocationGenerator.minItemAll;
@@ -140,7 +138,7 @@ public class EventListener implements Listener {
 		}
 	}
 	
-	public void spaceBuffer(Location loc) {
+	private static void spaceBuffer(Location loc) {
 		Location pivot = loc.clone();
 		for(double x = pivot.getX() - 2; x <= pivot.getX() + 2; x++ )
 		{
